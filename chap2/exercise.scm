@@ -96,6 +96,17 @@
 (same-parity 1 2 3 4 5 6 7)
 (same-parity 2 3 4 5 6 7)
 
+;;; Ex 2.21
 
+(define (nil) '())
 
+(define (map proc items)
+  (if (null? items)
+      nil
+      (cons (proc (car items))
+	    (map proc (cdr items)))))
 
+(define (square-list items)
+  (map square items))
+
+(square-list (list 1 2 3 4 5))
