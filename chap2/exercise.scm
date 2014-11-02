@@ -110,3 +110,13 @@
   (map square items))
 
 (square-list (list 1 2 3 4 5))
+
+;;; Ex 2.23
+
+(define (for-each proc items)
+  (if (null? items) true
+      (let ((_ (proc (car items))))
+	(for-each proc (cdr items)))))
+
+(for-each (lambda (x) (newline) (display x))
+	  (list 57 321 88))
