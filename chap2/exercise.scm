@@ -80,3 +80,22 @@
 (define no-more? null?)
 
 (cc 100 us-coins)
+
+;;; Ex 2.20
+
+(define (same-parity . args)
+  (define (filter pred? list)
+    (cond ((null? list) list)
+	  ((pred? (car list))
+	   (cons (car list) (filter pred? (cdr list))))
+	  (else (filter pred? (cdr list)))))
+  (cond ((null? args) args)
+	((even? (car args)) (filter even? args))
+	(else (filter odd? args))))
+
+(same-parity 1 2 3 4 5 6 7)
+(same-parity 2 3 4 5 6 7)
+
+
+
+
