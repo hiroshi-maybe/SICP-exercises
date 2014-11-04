@@ -120,3 +120,14 @@
 
 (for-each (lambda (x) (newline) (display x))
 	  (list 57 321 88))
+
+;;; Ex 2.27
+
+(define (deep-reverse items)
+  (cond ((null? items) items)
+	((not (pair? items)) items)
+	(else (append (deep-reverse (cdr items))
+		      (list (deep-reverse (car items)))))))
+
+(deep-reverse (list (list 1 2) (list 3 4)))
+
