@@ -141,3 +141,81 @@
 
 (fringe (list 1 (list 2 (list 3 4) (list 5 6)) (list 7 (list 8))))
 
+;;; Ex 2.29
+
+(define (make-mobile left right)
+  (list left right))
+(define (make-branch length structure)
+  (list length structure))
+
+(define (left-branch mobile)
+  (car mobile))
+(define (right-branch mobile)
+  (car (cdr mobile)))
+
+(define (branch-length branch)
+  (car branch))
+(define (branch-structure branch)
+  (car (cdr branch)))
+
+(define (is-structure-mobile? structure) 
+  (pair? structure)) 
+
+(make-mobile 2 3)
+(left-branch (make-mobile 2 3))
+(right-branch (make-mobile 2 3))
+(branch-length (make-branch 4 5))
+(branch-structure (make-branch 4 5))
+
+(define (branch-weight branch)
+  (let ((structure (branch-structure branch)))
+    (if (is-structure-mobile? structure)
+	(total-weight structure)
+	structure)))
+
+(define (total-weight mobile)
+  (+ (branch-weight (left-branch mobile))
+     (branch-weight (right-branch mobile))))
+
+(define level-1-mobile (make-mobile (make-branch 2 1) 
+                                    (make-branch 1 2))) 
+(define level-2-mobile (make-mobile (make-branch 3 level-1-mobile) 
+                                    (make-branch 9 1))) 
+(define level-3-mobile (make-mobile (make-branch 4 level-2-mobile) 
+                                    (make-branch 8 2))) 
+
+(total-weight level-1-mobile)
+(total-weight level-2-mobile)
+(total-weight level-3-mobile)
+
+(define (branch-torque br)
+  (* (branch-weight br)
+     (branch-length br)))
+
+(branch-torque (make-branch 2 3))
+
+(define (branch-balanced? br)
+  (let ((st (branch-structure br)))
+    (if (is-structure-mobile? st) (balanced? st) true)))
+
+(branch-balanced? (make-branch 2 3))
+
+(define (balanced? mobile)
+  (let ((left (left-branch mobile))
+	(right (right-branch mobile)))
+    (and (= (branch-torque left) (branch-torque right))
+	 (branch-balanced? left)
+	 (branch-balanced? right))))
+
+(balanced? (make-mobile (make-branch 2 3)
+			(make-branch 3 2)))
+
+(balanced? level-1-mobile)
+(balanced? level-2-mobile)
+(balanced? level-3-mobile)
+  
+(balanced? (make-mobile (make-branch 10 1000)
+			(make-branch 1 level-3-mobile)))
+
+
+
