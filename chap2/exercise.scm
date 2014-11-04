@@ -131,3 +131,13 @@
 
 (deep-reverse (list (list 1 2) (list 3 4)))
 
+;;; Ex 2.28
+
+(define (fringe li)
+  (cond ((null? li) li)
+	((not (pair? li)) (list li))
+	(else (append (fringe (car li))
+		      (fringe (cdr li))))))
+
+(fringe (list 1 (list 2 (list 3 4) (list 5 6)) (list 7 (list 8))))
+
