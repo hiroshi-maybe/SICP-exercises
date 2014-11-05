@@ -231,7 +231,13 @@
 	     (square-tree subtree)
 	     (square subtree))) tree))  
 
-(square-tree2
+(define (tree-map proc tree)
+  (map (lambda (subtree)
+         (if (pair? subtree)
+             (square-tree subtree)
+             (proc subtree))) tree))
+
+(tree-map square
  (list 1
        (list 2 (list 3 4) 5)
        (list 6 7)))
