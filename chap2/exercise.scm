@@ -231,6 +231,8 @@
 	     (square-tree subtree)
 	     (square subtree))) tree))  
 
+;; Ex 2.31
+
 (define (tree-map proc tree)
   (map (lambda (subtree)
          (if (pair? subtree)
@@ -241,6 +243,19 @@
  (list 1
        (list 2 (list 3 4) 5)
        (list 6 7)))
+
+;; Ex 2.32
+
+(define (subsets s)
+  (if (null? s)
+      (list '())
+      (let ((rest (subsets (cdr s))))
+	(append rest (map (lambda (x) (cons (car s) x)) rest)))))
+
+(subsets2 (list 1 2 3))
+
+
+
 
 
 
