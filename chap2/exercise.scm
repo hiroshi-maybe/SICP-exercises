@@ -282,7 +282,7 @@
 ;; Ex 2.35
 
 (define (count-leaves t)
-  (accumulate (lambda (x c) (+ x c)) 0
+  (accumulate + 0
 	      (map (lambda (e)
 		     (if (pair? e)
 			 (count-leaves e)
@@ -290,6 +290,15 @@
 
 (count-leaves (cons (list 1 2) (list 3 4)))
 
+;; Ex 2.36
+
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs))
+      '()
+      (cons (accumulate op init (map car seqs))
+	    (accumulate-n op init (map cdr seqs)))))
+
+(accumulate-n + 0 (list (list 1 2 3) (list 4 5 6) (list 7 8 9) (list 10 11 12)))
 
 
 
