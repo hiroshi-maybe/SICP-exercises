@@ -100,11 +100,11 @@
 
 (define (nil) '())
 
-(define (map proc items)
-  (if (null? items)
-      nil
-      (cons (proc (car items))
-	    (map proc (cdr items)))))
+;(define (map proc items)
+;  (if (null? items)
+;      nil
+;      (cons (proc (car items))
+;	    (map proc (cdr items)))))
 
 (define (square-list items)
   (map square items))
@@ -262,8 +262,8 @@
       (op (car sequence)
 	  (accumulate op initial (cdr sequence)))))
 
-(define (map p sequence)
-  (accumulate (lambda (x y) (cons (p x) y)) '() sequence))
+;(define (map p sequence)
+;  (accumulate (lambda (x y) (cons (p x) y)) '() sequence))
 (define (append seq1 seq2)
   (accumulate cons seq2 seq1))
 (define (length sequence)
@@ -300,11 +300,33 @@
 
 (accumulate-n + 0 (list (list 1 2 3) (list 4 5 6) (list 7 8 9) (list 10 11 12)))
 
+;; Ex 2.37
 
+(define (dot-product v1 v2) 
+  (accumulate + 0 (map * v1 v2)))
 
+(define (matrix-*-vector m v)
+  (map (lambda (row) (dot-product row v)) m))
 
+;; This clean form is awesome!!!
+(define (transpose mat)
+  (accumulate-n cons '() mat))
 
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (map (lambda (row)
+	   (matrix-*-vector cols row)) m)))
 
-
-
+(define v (list 1 3 -5))
+(define w (list 4 -2 -1))
+(dot-product v w)
+; 3
+(define m (list (list 1 2 3) (list 4 5 6)))
+(define v (list 1 2 3))
+(matrix-*-vector m v)
+; (14 32)
+(define a (list (list 14 9 3) (list 2 11 15) (list 0 12 17) (list 5 2 3)))
+(define b (list (list 12 25) (list 9 10) (list 8 5)))
+(matrix-*-matrix a b)
+; ((273 455) (243 235) (244 205) (102 160))
 
