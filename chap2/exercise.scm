@@ -279,6 +279,19 @@
 ; 79
 (horner-eval 2 (list 1 3 0 5 0 1))
 
+;; Ex 2.35
+
+(define (count-leaves t)
+  (accumulate (lambda (x c) (+ x c)) 0
+	      (map (lambda (e)
+		     (if (pair? e)
+			 (count-leaves e)
+			 1)) t)))
+
+(count-leaves (cons (list 1 2) (list 3 4)))
+
+
+
 
 
 
