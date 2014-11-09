@@ -330,3 +330,20 @@
 (matrix-*-matrix a b)
 ; ((273 455) (243 235) (244 205) (102 160))
 
+;; Ex 2.40
+
+(define (enumerate-interval low high)
+  (if (> low high)
+      '()
+      (cons low (enumerate-interval (+ low 1) high))))
+
+(define (flatmap proc seq)
+  (accumulate append '() (map proc seq)))
+
+(define (unique-pairs n)
+  (filter (lambda (pair) (not (= (car pair) (cadr pair))))
+	  (flatmap (lambda (i)
+		     (map (lambda (j) (list i j))
+			  (enumerate-interval 1 n)))
+		   (enumerate-interval 1 n))))
+
