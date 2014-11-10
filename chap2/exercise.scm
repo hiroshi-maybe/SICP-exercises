@@ -347,3 +347,76 @@
 			  (enumerate-interval 1 n)))
 		   (enumerate-interval 1 n))))
 
+;; Ex 2.41
+
+(define (pairs n)
+  (flatmap (lambda (i)
+	     (map (lambda (j) (list i j)) 
+		  (enumerate-interval 1 (- i 1)))) 
+	   (enumerate-interval 1 n)))
+
+(define (triples n)
+  (flatmap (lambda (pair)
+	     (map (lambda (j) (append pair (list j))) 
+		  (enumerate-interval 1 (cadr pair))))
+	   (pairs n)))
+
+(define (sum items)
+  (accumulate + 0 items))
+
+(define (triple-sum n s)
+  (filter (lambda (triple) (= s (sum triple)))
+	  (triples n)))
+
+;; Ex 2.42  
+
+(define (every? pred items)
+  (accumulate (lambda (item res) (and res (pred item)))
+	      true
+	      items))
+
+(define (queens board-size)
+  (define empty-board '())
+  (define (put-queen row col) (cons row col))
+  (define (row queen) (car queen))
+  (define (col queen) (cdr queen))
+
+  (define (adjoin-position new-row col board-state)
+    (cons (put-queen new-row col) board-state))
+
+  (define (safe? tested-col board-state)
+    (define (row-in-board? row)
+      (and (> row 0)
+	   (<= row board-size)))
+    (define (invalid-horizontal-rows rest-queens)
+      (map row rest-queens))
+    (define (invalid-diagonal-rows rest-queens)
+      (filter row-in-board?
+	      (flatmap (lambda (queen)
+			 (let ((my-row (row queen))
+			       (my-col (col queen)))
+			   (list (- my-row (- tested-col my-col)) (+ my-row (- tested-col my-col)))))
+		       rest-queens)))
+    (define (invalid-rows board-state)
+      (append (invalid-horizontal-rows (cdr board-state))
+	      (invalid-diagonal-rows (cdr board-state))))
+
+    (let ((tested-row (row (car board-state)))
+	  (my-invalid-rows (invalid-rows board-state)))
+      (every? (lambda (row) (not (= row tested-row))) my-invalid-rows)))
+    
+  (define (queen-cols k)
+    (if (= k 0)
+	(list empty-board)
+	(filter
+	 (lambda (positions) (safe? k positions))
+	 (flatmap
+	  (lambda (rest-of-queens)
+	    (map (lambda (new-row)
+		   (adjoin-position new-row k rest-of-queens))
+		 (enumerate-interval 1 board-size)))
+	  (queen-cols (- k 1))))))
+  (queen-cols board-size))
+
+
+
