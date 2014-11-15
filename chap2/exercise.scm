@@ -492,4 +492,33 @@
 				   (make-leaf 'C 1)))))
 (define sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0))
 
- (decode sample-message sample-tree)
+(decode sample-message sample-tree)
+
+;; Ex 2.68
+
+(define (element-of-set? x set)
+  (cond ((null? set) false)
+        ((equal? x (car set)) true)
+        (else (element-of-set? x (cdr set)))))
+
+(define (encode message tree)
+  (if (null? message)
+      '()
+      (append (encode-symbol (car message) tree)
+	      (encode (cdr message) tree))))
+
+(define sample-symbol-message '(A D A B B C A))
+
+(define (encode-symbol symbol tree)
+  (if (leaf? tree)
+      '()
+      (let ((left-symbols (symbols (left-branch tree)))
+	    (right-symbols (symbols (right-branch tree))))
+	(cond ((element-of-set? symbol left-symbols)
+	       (cons 0 (encode-symbol symbol (left-branch tree))))
+	      ((element-of-set? symbol right-symbols)
+	       (cons 1 (encode-symbol symbol (right-branch tree))))
+	      ((else) (error "bad symbol -- " symbol))))))
+
+(encode sample-symbol-message sample-tree)
+
