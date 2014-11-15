@@ -518,7 +518,27 @@
 	       (cons 0 (encode-symbol symbol (left-branch tree))))
 	      ((element-of-set? symbol right-symbols)
 	       (cons 1 (encode-symbol symbol (right-branch tree))))
-	      ((else) (error "bad symbol -- " symbol))))))
+	      (else (error "bad symbol -- " symbol))))))
 
 (encode sample-symbol-message sample-tree)
 
+;; Ex 2.69
+
+(define (generate-huffman-tree pairs)
+  (successive-merge (make-leaf-set pairs)))
+
+(define sample-pairs '((A 3) (B 5) (C 6) (D 6)))
+
+(define (successive-merge trees)
+  (if (null? (cdr trees))
+      (car trees)
+      (let ((left (car trees))
+	    (right (cadr trees))
+	    (rest (cddr trees)))
+	(successive-merge (adjoin-set (make-code-tree left right) rest)))))
+
+(generate-huffman-tree sample-pairs)
+
+(define test-tree (generate-huffman-tree sample-pairs)) 
+  
+(encode '(A B C D) test-tree)
