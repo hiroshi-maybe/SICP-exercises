@@ -557,6 +557,7 @@
 (define (mul x y) (apply-generic 'mul x y))
 (define (div x y) (apply-generic 'div x y))
 (define (equ? x y) (apply-generic 'equ? x y))
+(define (=zero? x) (apply-generic '=zero? x))
 
 (define (install-scheme-number-package)
   (define (tag x)
@@ -572,6 +573,8 @@
 
 ; Ex 2.79
   (put 'equ? '(scheme-number scheme-number) =)
+; Ex 2.80
+  (put '=zero? '(scheme-number) (lambda (x) (= x 0)))
 
   (put 'make 'scheme-number
        (lambda (x) (tag x)))
@@ -606,6 +609,9 @@
   (define (eq-rat x y)
     (= (* (numer x) (denom y))
        (* (denom x) (numer y))))
+; Ex 2.80
+  (define (=zero? x)
+    (= (numer x) 0))
 
   ;; interface to rest of the system
   (define (tag x) (attach-tag 'rational x))
@@ -620,6 +626,8 @@
 
 ; Ex 2.79
   (put 'equ? '(rational rational) eq-rat)
+; Ex 2.80
+  (put '=zero? '(rational) =zero?)
 
   (put 'make 'rational
        (lambda (n d) (tag (make-rat n d))))
@@ -652,6 +660,10 @@
   (define (eq-complex z1 z2)
     (and (= (real-part z1) (real-part z2))
 	 (= (imag-part z1) (imag-part z2))))
+; Ex 2.80
+  (define (=zero? z)
+    (and (= (real-part z) 0)
+	 (= (imag-part z) 0)))
 
   ;; interface to rest of the system
   (define (tag z) (attach-tag 'complex z))
@@ -666,6 +678,8 @@
 
 ; Ex 2.79
   (put 'equ? '(complex complex) eq-complex)
+; Ex 2.80
+  (put '=zero? '(complex) =zero?)
 
   (put 'make-from-real-imag 'complex
        (lambda (x y) (tag (make-from-real-imag x y))))
