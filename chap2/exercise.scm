@@ -556,6 +556,7 @@
 (define (sub x y) (apply-generic 'sub x y))
 (define (mul x y) (apply-generic 'mul x y))
 (define (div x y) (apply-generic 'div x y))
+(define (equ? x y) (apply-generic 'equ? x y))
 
 (define (install-scheme-number-package)
   (define (tag x)
@@ -568,6 +569,11 @@
        (lambda (x y) (tag (* x y))))
   (put 'div '(scheme-number scheme-number)
        (lambda (x y) (tag (/ x y))))
+
+; Ex 2.79
+  (put 'equ? '(scheme-number scheme-number)
+       (lambda (x y) (eq? x y)))
+
   (put 'make 'scheme-number
        (lambda (x) (tag x)))
   'done)
@@ -596,6 +602,12 @@
   (define (div-rat x y)
     (make-rat (* (numer x) (denom y))
               (* (denom x) (numer y))))
+
+; Ex 2.79
+  (define (eq-rat x y)
+    (= (* (numer x) (denom y))
+       (* (denom x) (numer y))))
+
   ;; interface to rest of the system
   (define (tag x) (attach-tag 'rational x))
   (put 'add '(rational rational)
@@ -606,6 +618,10 @@
        (lambda (x y) (tag (mul-rat x y))))
   (put 'div '(rational rational)
        (lambda (x y) (tag (div-rat x y))))
+
+; Ex 2.79
+  (put 'equ? '(rational rational)
+       (lambda (x y) (eq-rat x y)))
 
   (put 'make 'rational
        (lambda (n d) (tag (make-rat n d))))
@@ -634,6 +650,11 @@
     (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
                        (- (angle z1) (angle z2))))
 
+; Ex 2.79
+  (define (eq-complex z1 z2)
+    (and (= (real-part z1) (real-part z2))
+	 (= (imag-part z1) (imag-part z2))))
+
   ;; interface to rest of the system
   (define (tag z) (attach-tag 'complex z))
   (put 'add '(complex complex)
@@ -644,6 +665,11 @@
        (lambda (z1 z2) (tag (mul-complex z1 z2))))
   (put 'div '(complex complex)
        (lambda (z1 z2) (tag (div-complex z1 z2))))
+
+; Ex 2.79
+  (put 'equ? '(complex complex)
+       (lambda (z1 z2) (eq-complex z1 z2)))
+
   (put 'make-from-real-imag 'complex
        (lambda (x y) (tag (make-from-real-imag x y))))
   (put 'make-from-mag-ang 'complex
