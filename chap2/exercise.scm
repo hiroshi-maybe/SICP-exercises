@@ -571,8 +571,7 @@
        (lambda (x y) (tag (/ x y))))
 
 ; Ex 2.79
-  (put 'equ? '(scheme-number scheme-number)
-       (lambda (x y) (eq? x y)))
+  (put 'equ? '(scheme-number scheme-number) =)
 
   (put 'make 'scheme-number
        (lambda (x) (tag x)))
@@ -620,8 +619,7 @@
        (lambda (x y) (tag (div-rat x y))))
 
 ; Ex 2.79
-  (put 'equ? '(rational rational)
-       (lambda (x y) (eq-rat x y)))
+  (put 'equ? '(rational rational) eq-rat)
 
   (put 'make 'rational
        (lambda (n d) (tag (make-rat n d))))
@@ -667,8 +665,7 @@
        (lambda (z1 z2) (tag (div-complex z1 z2))))
 
 ; Ex 2.79
-  (put 'equ? '(complex complex)
-       (lambda (z1 z2) (eq-complex z1 z2)))
+  (put 'equ? '(complex complex) eq-complex)
 
   (put 'make-from-real-imag 'complex
        (lambda (x y) (tag (make-from-real-imag x y))))
