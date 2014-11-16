@@ -542,3 +542,10 @@
 (define test-tree (generate-huffman-tree sample-pairs)) 
   
 (encode '(A B C D) test-tree)
+
+(define lyrics-tree (generate-huffman-tree '((a 2) (na 16) (boom 1) (sha 3) (get 2) (yip 9) (job 2) (wah 1))))
+
+;; 84 bits
+(encode '(Get a job Sha na na na na na na na na Get a job Sha na na na na na na na na Wah yip yip yip yip yip yip yip yip yip Sha boom) lyrics-tree)
+
+
