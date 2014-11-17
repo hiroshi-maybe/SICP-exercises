@@ -558,6 +558,7 @@
 (define (div x y) (apply-generic 'div x y))
 (define (equ? x y) (apply-generic 'equ? x y))
 (define (=zero? x) (apply-generic '=zero? x))
+(define (raise x) (apply-generic 'raise x))
 
 (define (install-scheme-number-package)
   (define (tag x)
@@ -575,6 +576,8 @@
   (put 'equ? '(scheme-number scheme-number) =)
 ; Ex 2.80
   (put '=zero? '(scheme-number) (lambda (x) (= x 0)))
+; Ex 2.83
+  (put 'raise '(scheme-number) (lambda (x) (make-rational x 1)))
 
   (put 'make 'scheme-number
        (lambda (x) (tag x)))
@@ -628,6 +631,8 @@
   (put 'equ? '(rational rational) eq-rat)
 ; Ex 2.80
   (put '=zero? '(rational) =zero?)
+; Ex 2.83
+  (put 'raise '(rational) (lambda (x) (make-complex-from-real-imag (/ (numer x) (denom x)) 0)))
 
   (put 'make 'rational
        (lambda (n d) (tag (make-rat n d))))
