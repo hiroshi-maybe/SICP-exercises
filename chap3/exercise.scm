@@ -35,4 +35,43 @@
 (s 'how-many-calls?)
 ; 0
 
+;;; Ex 3.7
+
+; modified solution of Ex 3.3
+(define (make-account balance password)
+  (define (withdraw amount)
+    (if (>= balance amount)
+	(begin 
+	  (set! balance (- balance amount)) 
+	  balance)
+	"Insufficient funds"))
+  (define (deposit amount)
+    (set! balance (+ balance amount)) balance)
+  (define (authenticate p)
+    (eq? p password))
+  (define (dispatch p m)
+    (let ((auth-valid (authenticate p)))
+      (cond ((eq? m 'authenticate) auth-valid)
+	    ((not auth-valid) (lambda (x) "Incorrect password"))
+	    ((eq? m 'withdraw) withdraw)
+	    ((eq? m 'deposit) deposit)
+	    (else (error "Unknown request -- MAKE-ACCOUNT" m)))))
+  dispatch)
+
+(define (make-joint org-acc org-password password)
+  (define (dispatch p m)
+    (if (not (eq? p password))
+	(lambda (x) "Incorrect password in joint account")
+	(org-acc org-password m)))
+  (if (org-acc org-password 'authenticate)
+      dispatch
+      (error "Incorrect password (Cannot create joint account)")))
+
+(define peter-acc (make-account 100 'open-sesame))
+(peter-acc 'open-sesame 'authenticate)
+(define paul-acc
+  (make-joint peter-acc 'open-sesame 'rosebud))
+
+((peter-acc 'open-sesame 'withdraw) 10)
+((paul-acc 'rosebud 'withdraw) 10)
 
