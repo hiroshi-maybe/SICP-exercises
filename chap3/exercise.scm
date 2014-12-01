@@ -106,3 +106,25 @@
 (set-car! z2 (last-pair z2))
 (contains-cycle z2)
 ; true
+
+;;; Ex 3.19
+
+(define (contains-cycle-ex list)
+  (define (safe-cdr x)
+    (if (pair? x)
+	(cdr x)
+	'()))
+  (define (suc x) (safe-cdr x))
+  (define (ssuc x) (safe-cdr (safe-cdr x)))
+  (define (nil? x) (eq? x '()))
+  (define (loop slow fast)
+    (cond ((nil? slow) false)
+	  ((nil? fast) false)
+	  ((eq? slow fast) true)
+	  (else (loop (suc slow) (ssuc fast)))))
+  (loop (suc list) (ssuc list)))
+
+(contains-cycle-ex (list 'a 'b 'c))
+; false
+(contains-cycle-ex z1)
+; true
