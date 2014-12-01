@@ -75,3 +75,34 @@
 ((peter-acc 'open-sesame 'withdraw) 10)
 ((paul-acc 'rosebud 'withdraw) 10)
 
+;;; Ex 3.18
+
+(define (contains-cycle list)
+  (let ((visited '()))
+    (define (mark-visited x)
+      (cond ((not (pair? x)) false)
+	    ((memq x visited) true)
+	    (else (begin (set! visited (cons x visited))
+			 false))))
+    (define (loop x)
+      (cond ((not (pair? x)) false)
+	    ((mark-visited (car x)) true)
+	    ((mark-visited (cdr x)) true)
+	    (else (or (loop (car x)) (loop (cdr x))))))
+    (loop list)))
+
+(contains-cycle (list 'a 'b 'c))
+; false
+
+(define (last-pair x)
+  (if (null? (cdr x)) x(last-pair (cdr x))))
+(define (make-cycle x)
+  (set-cdr! (last-pair x) x)
+  x)
+(define z1 (make-cycle (list 'a 'b 'c)))
+(contains-cycle z1)
+; true
+(define z2 (list 'a 'b 'c))
+(set-car! z2 (last-pair z2))
+(contains-cycle z2)
+; true
