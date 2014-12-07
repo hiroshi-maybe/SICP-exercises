@@ -361,5 +361,20 @@
 (define (logic-or s1 s2)
   (if (or (= s1 1) (= s2 1)) 1 0))
 
+;;; Ex 3.29
 
+(define (or-gate-ex a1 a2 output)
+  (let ((b1 make-wire)
+	(b2 make-wire)
+	(c make-wire))
+    (inverter a1 b1)
+    (inverter a2 b2)
+    (and-gate b1 b2 c)
+    (inverter c output)
+    'ok))
+
+
+
+
+	
 
