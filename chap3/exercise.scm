@@ -109,6 +109,8 @@
 
 ;;; Ex 3.19
 
+(define (nil? x) (eq? x '()))
+
 (define (contains-cycle-ex list)
   (define (safe-cdr x)
     (if (pair? x)
@@ -172,6 +174,69 @@
 (delete-queue! q1)
 (print-queue q1)
 
+;;; Ex 3.23
 
+; same implementation as normal queue
+;(define (front-ptr queue) (car queue))
+;(define (rear-ptr queue) (cdr queue))
+;(define (set-front-ptr! queue item) (set-car! queue item))
+;(define (set-rear-ptr! queue item) (set-cdr! queue item))
 
-  
+(define (make-dlink-pair val)
+  (cons val '()))
+(define (dlink-pair-prev-ptr pair) (cdr pair))
+(define (dlink-pair-val pair) (car pair))
+(define (set-dlink-pair-prev-ptr! pair item) (set-cdr! pair item))
+
+(define (make-dlink-item val)
+  (cons (make-dlink-pair val) '()))
+(define dlink-pair car)
+(define (next-item item)
+  (if (nil? item) item (cdr item)))
+(define (prev-item item)
+  (if (nil? item) item (dlink-pair-prev-ptr (dlink-pair item))))
+(define (val-item item)
+  (dlink-pair-val (dlink-pair item)))
+(define (set-prev-item! item prev-item)
+  (if (not (nil? item))
+      (set-dlink-pair-prev-ptr! (dlink-pair item) prev-item)))
+(define (set-next-item! item next-item)
+  (if (not (nil? item))
+      (set-cdr! item next-item)))
+
+(define (empty-deque? queue) (null? (front-ptr queue)))
+(define (make-deque) (cons '() '()))
+(define (front-deque queue) (val-item (front-ptr queue)))
+(define (rear-deque queue)  (val-item (rear-ptr  queue)))
+
+(define (safe-front-ptr! queue rear-item)  (if (nil? (front-ptr queue)) (set-front-ptr! queue rear-item)))
+(define (safe-rear-ptr!  queue front-item) (if (nil? (rear-ptr  queue)) (set-rear-ptr!  queue front-item)))
+
+(define (front-insert-deque! queue val)
+  (let ((next-item (front-ptr queue))
+	(new-item (make-dlink-item val)))
+    (begin (set-prev-item! next-item new-item)
+	   (set-next-item! new-item next-item)
+	   (set-front-ptr! queue new-item)
+	   (safe-rear-ptr! queue new-item))))
+
+(define (rear-insert-deque! queue val)
+  (let ((prev-item (rear-ptr queue))
+	(new-item (make-dlink-item val)))
+    (begin (set-prev-item! new-item prev-item)
+	   (set-next-item! prev-item new-item)
+	   (set-rear-ptr! queue new-item)
+	   (safe-front-ptr! queue new-item))))
+
+(define (print-deque queue)
+  (define (iter-backword item vals)
+    (if (nil? item)
+	vals
+	(iter-backword (prev-item item) (cons (val-item item) vals))))
+  (iter-backword (rear-ptr queue) '()))
+
+(define deq1 (make-deque))
+(front-insert-deque! deq1 'a))
+(front-insert-deque! deq1 'b))
+(rear-insert-deque! deq1 'c))
+(print-deque deq1)
