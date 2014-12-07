@@ -373,6 +373,34 @@
     (inverter c output)
     'ok))
 
+;;; Ex 3.30
+
+(define (half-adder a b s c)
+  (let ((d (make-wire)) (e (make-wire)))
+    (or-gate a b d)
+    (and-gate a b c)
+    (inverter c e)
+    (and-gate d e s)
+    'ok))
+
+(define (full-adder a b c-in sum c-out)
+  (let ((s (make-wire))
+        (c1 (make-wire))
+        (c2 (make-wire)))
+    (half-adder b c-in s c1)
+    (half-adder a s sum c2)
+    (or-gate c1 c2 c-out)
+    'ok))
+
+(define (ripple-carry-adder a b s c-out)
+  (let ((c-in (make-wire))
+	(first? (null? (cdr a))))
+    (if first?
+	(set-signal! c-in 0)
+	(ripple-carry-adder (cdr a) (cdr b) (cdr s) c-in))
+    (full-adder (car a) (car b) c-in (car s) c-out)))
+
+
 
 
 
