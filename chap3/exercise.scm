@@ -264,3 +264,58 @@
 (rear-insert-deque! deq1 'c)
 (print-deque deq1)
 
+;;; Ex 3.25
+
+(define (make-table same-key?)
+   (let ((local-table (list '*table*)))
+         (define (assoc key records)
+           (cond ((null? records) false)
+                 ((same-key? key (caar records)) (car records))
+                 (else (assoc key (cdr records)))))
+         (define (lookup keys table)
+	   (let ((key (car keys))
+		 (rest-keys (cdr keys)))
+	     (if (null? rest-keys)
+		 (let ((record (assoc key (cdr table))))
+		   (if record
+		       (cdr record)
+		       false))
+		 (let ((subtable (assoc key (cdr table))))
+		   (if subtable
+		       (lookup rest-keys subtable)
+		       false)))))
+         (define (insert! keys value table)
+	   (let ((key (car keys))
+		 (rest-keys (cdr keys)))
+	     (if (null? rest-keys)
+		 (let ((record (assoc key (cdr table))))
+		   (if record
+		       (set-cdr! record value)
+		       (set-cdr! table
+				 (cons (cons key value)
+				       (cdr table)))))
+		 (let ((subtable (assoc key (cdr table))))
+		   (if subtable
+		       (insert! rest-keys value subtable)
+		       (begin (set-cdr! table
+					(cons (list key) (cdr table)))
+			      (insert! rest-keys value (cadr table))))))))
+         (define (dispatch m)
+           (cond ((eq? m 'lookup-proc)  (lambda (keys) (lookup  keys local-table)))
+                 ((eq? m 'insert-proc!) (lambda (keys value) (insert! keys value local-table)))
+                 (else (error "Unkown operation -- TABLE" m))))
+         dispatch))
+  
+(define operation-table (make-table eq?))
+(define get (operation-table 'lookup-proc))
+(define put (operation-table 'insert-proc!))
+
+(put (list 'a 'b 'c1) 'val1)
+(put (list 'a 'b 'c2) 'val2)
+(get (list 'd))
+; false
+(get (list 'a 'b 'c1))
+; val1
+(put (list 'a 'b 'c2) 'val2+)
+(get (list 'a 'b 'c2))
+; val2+
