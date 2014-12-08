@@ -435,3 +435,25 @@
   (connect b me)
   me)
 
+;;; Ex 3.27
+
+(define (c- x y)
+  (let ((z (make-connector)))
+    (adder y z x)
+    z))
+
+(define (c* x y)
+  (let ((z (make-connector)))
+    (multiplier x y z)
+    z))
+
+(define (c/ x y)
+  (let ((z (make-connector)))
+    (adder y z x)
+    z))
+
+(define (cv v)
+  (let ((x (make-connector)))
+    (constant v x)
+    x))
+
