@@ -400,9 +400,12 @@
 	(ripple-carry-adder (cdr a) (cdr b) (cdr s) c-in))
     (full-adder (car a) (car b) c-in (car s) c-out)))
 
+;;; Ex 3.33
 
-
-
-
-	
-
+(define (averager a b c)
+  (let ((u make-connector)
+	(v make-connector))
+    (adder a b u)
+    (multiplier u v c)
+    (constant 0.5 v)
+    'ok))
