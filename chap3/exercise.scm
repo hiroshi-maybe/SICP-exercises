@@ -457,3 +457,37 @@
     (constant v x)
     x))
 
+;;; Ex 3.47
+
+; a
+(define (make-semaphore n)
+  (let ((mutex (make-mutex))
+	(counter 0))
+    (define (the-semaphore m)
+      (mutex 'acquire)
+      (cond ((eq? m 'acquire)
+	     (if (< locking-count n)
+		 (set! counter (+ counter 1))
+		 (the-semaphore 'acquire))) ; retry
+	    ((eq? m 'release)
+	     (set! counter (- counter 1))))
+      (the-mutex 'release))
+    the-semaphore))
+
+; b
+(define (make-semaphore-ex n)
+  (let ((cell (list false))
+	(counter 0))
+    (define (the-semaphore m)
+      (cond ((eq? m 'acquire)
+	     (if (and (< locking-count n)
+		      (test-and-set! cell))
+		 (begin (set! counter (+ counter 1))
+			(clear! cell))
+		 (the-semaphore 'acquire))) ; retry
+	    ((eq? m 'release)
+	     (if (test-and-set! cell)
+		 (begin (set! counter (- counter 1))
+			(clear! cell))))))
+    the-semaphore))
+
