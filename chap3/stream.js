@@ -1,5 +1,5 @@
 /*********************************************
- * Reinvention of streams in SICP
+ * Reinvention of Stream in SICP
  ********************************************/
 
 /************  Helpers  ************/
