@@ -491,3 +491,34 @@
 			(clear! cell))))))
     the-semaphore))
 
+;;; 3.5
+
+; (cons-stream <a> <b>)
+;   is equivalent to
+; (cons <a> (delay <b>))
+
+(define (stream-car stream) (car stream))
+(define (stream-cdr stream) (force (cdr stream)))
+
+(define (stream-enumerate-interval low high)
+  (if (> low high)
+      the-empty-stream
+      (cons-stream
+       low
+       (stream-enumerate-interval (+ low 1) high))))
+
+(define (stream-filter pred stream)
+  (cond ((stream-null? stream) the-empty-stream)
+        ((pred (stream-car stream))
+         (cons-stream (stream-car stream)
+                      (stream-filter pred
+                                     (stream-cdr stream))))
+        (else (stream-filter pred (stream-cdr stream)))))
+
+; obtain second number
+(stream-car
+ (stream-cdr
+  (stream-filter (lambda (x) (memq x (list 2 4 6)))
+                 (stream-enumerate-interval 0 20))))
+
+
