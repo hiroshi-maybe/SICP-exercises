@@ -521,4 +521,19 @@
   (stream-filter (lambda (x) (memq x (list 2 4 6)))
                  (stream-enumerate-interval 0 20))))
 
+;;; Ex 3.50
+
+(define (stream-map proc . argstreams)
+  (if (stream-null? (car argstreams)) the-empty-stream
+      (cons-stream
+       (apply proc (map stream-car argstreams))
+       (apply stream-map
+	      (cons proc (map stream-cdr argstreams))))))
+
+(stream-car
+ (stream-cdr
+  (stream-map + (stream-enumerate-interval 1 200000)
+	      (stream-enumerate-interval 2 200000)
+	      (stream-enumerate-interval 3 200000))))
+
 
