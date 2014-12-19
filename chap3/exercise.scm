@@ -536,4 +536,32 @@
 	      (stream-enumerate-interval 2 200000)
 	      (stream-enumerate-interval 3 200000))))
 
+;;; Ex 3.51
+
+(define (stream-ref s n)
+  (if (= n 0)
+      (stream-car s)
+      (stream-ref (stream-cdr s) (- n 1))))
+
+(define (stream-for-each proc s)
+  (if (stream-null? s)
+      'done
+      (begin (proc (stream-car s))
+	     (stream-for-each proc (stream-cdr s)))))
+
+(define (display-stream s)
+  (stream-for-each display-line s))
+(define (display-line x)
+  (newline)
+  (display x))
+(define (show x)
+  (display-line x)
+  x)
+
+(define x (stream-map show (stream-enumerate-interval 0 10)))
+(stream-ref x 5)
+; 1 2 3 4 5
+(stream-ref x 7)
+; 6 7 because stream is consumed subsequently
+
 
