@@ -14,6 +14,12 @@ function flip(f) {
   };
 }
 
+function invert(f) {
+  return function() {
+    return !f.apply(null, arguments);
+  };
+}
+
 var dividable_flip =flip(dividable),
     dividable_by = function(x) { return dividable_flip.bind(null, x); },
     dividable_3 = dividable_by(3);
@@ -114,3 +120,37 @@ second = stream_car(
 
 console.assert(second===15);
 console.log(second+" found in stream (delayed list)");
+
+// fibonacci
+
+function stream_ref(stream, n) {
+  return n == 0 ? stream_car(stream) : stream_ref(stream_cdr(stream), n-1);
+}
+
+function fibgen(a, b) {
+  return cons_stream(a, function() {
+    return fibgen(b, a + b);
+  });
+}
+
+console.assert(stream_ref(fibgen(0, 1), 6)===8);
+
+// sieve
+
+// number -> stream
+function integer_starting_from(n) {
+  return cons_stream(n, function() {
+    return integer_starting_from(n+1);
+  });
+}
+
+// stream -> stream
+function sieve(stream) {
+  var val = stream_car(stream);
+  return cons_stream(val, function() {
+    return sieve(stream_filter(invert(dividable_by(val)), stream_cdr(stream)));
+  });
+}
+
+var primes = sieve(integer_starting_from(2));
+console.assert(stream_ref(primes, 10)===31);
