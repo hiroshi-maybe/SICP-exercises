@@ -562,7 +562,7 @@
 (stream-ref x 5)
 ; 1 2 3 4 5
 (stream-ref x 7)
-; 6 7 because stream is consumed subsequently
+; 6 7 because stream is consumed sequently
 
 ;;; Ex 3.54
 
@@ -657,3 +657,33 @@
   (stream-limit (sqrt-stream x) tolerance))
 
 (sqrt 2 0.00001)
+
+;;; Ex 3.67
+
+(define (interleave s1 s2)
+ (if (stream-null? s1)
+      s2
+      (cons-stream (stream-car s1)
+                   (interleave s2 (stream-cdr s1)))))
+(define (pairs s t)
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (interleave
+    (stream-map (lambda (x) (list (stream-car s) x))
+                (stream-cdr t))
+    (pairs (stream-cdr s) (stream-cdr t)))))
+
+; pairs are not distributed equally
+(define (all-pairs s t)
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (interleave
+    (interleave
+     (stream-map (lambda (x) (list (stream-car s) x))
+		 (stream-cdr t))
+     (all-pairs (stream-cdr s) (stream-cdr t)))
+    (stream-map (lambda (x) (list x (stream-car t)))
+		 (stream-cdr s)))))
+
+(display-stream-until (all-pairs integers integers) 30)
+
