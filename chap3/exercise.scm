@@ -631,5 +631,29 @@
 (define sine-series
   (cons-stream 0 (integrate-series cosine-series)))
 
+;;; Ex 3.64
 
+(define (average x y)
+  (/ (+ x y) 2))
+(define (sqrt-improve guess x)
+  (average guess (/ x guess)))
+(define (sqrt-stream x)
+  (define guesses
+    (cons-stream 1.0
+                 (stream-map (lambda (guess)
+                               (sqrt-improve guess x))
+                             guesses)))
+  guesses)
 
+(define (stream-limit s tolerance)
+  (let ((s-next (stream-cdr s)))
+    (let ((v1 (stream-car s))
+	  (v2 (stream-car s-next)))
+      (if (< (abs (- v1 v2)) tolerance)
+	  v2
+	  (stream-limit s-next tolerance)))))
+
+(define (sqrt x tolerance)
+  (stream-limit (sqrt-stream x) tolerance))
+
+(sqrt 2 0.00001)
