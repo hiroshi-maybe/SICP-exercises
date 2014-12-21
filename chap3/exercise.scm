@@ -578,3 +578,13 @@
 (stream-ref factorials 3)
 
 
+;;; Ex 3.55
+
+(define (partial-sums s)
+  (cons-stream (stream-car s)
+	       (add-streams (partial-sums s) (stream-cdr s))))
+
+(stream-ref (partial-sums integers) 4)
+; 15
+
+
