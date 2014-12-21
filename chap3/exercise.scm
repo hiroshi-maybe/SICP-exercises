@@ -613,3 +613,23 @@
 
 ;(stream-ref (stream-map show S) 10)
 (display-stream-until S 20)
+
+;;; Ex 3.59
+
+; a
+(define (integrate-series s)
+  (stream-map / s integers))
+
+; b
+(define exp-series
+  (cons-stream 1 (integrate-series exp-series)))
+(define (neg-streams s)
+  (stream-map (lambda (x) (- x)) s))
+
+(define cosine-series
+  (cons-stream 1 (neg-streams (integrate-series sine-series))))
+(define sine-series
+  (cons-stream 0 (integrate-series cosine-series)))
+
+
+
