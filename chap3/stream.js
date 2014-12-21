@@ -20,6 +20,10 @@ function invert(f) {
   };
 }
 
+function add(x, y) {
+  return x+y;
+}
+
 var dividable_flip =flip(dividable),
     dividable_by = function(x) { return dividable_flip.bind(null, x); },
     dividable_3 = dividable_by(3);
@@ -154,3 +158,47 @@ function sieve(stream) {
 
 var primes = sieve(integer_starting_from(2));
 console.assert(stream_ref(primes, 10)===31);
+
+// recursive fibonacci stream
+
+function stream_map() {
+  var args = Array.prototype.slice.call(arguments),
+      proc = args.shift();
+  
+  if (is_null_stream(args[0])) { empty_stream(); }
+
+  return cons_stream(proc.apply(null, args.map(stream_car)), function() {
+    return stream_map.apply(null, [proc].concat(args.map(stream_cdr)));
+  });
+}
+
+var sum_stream = stream_map(function() {
+  var args = Array.prototype.slice.call(arguments);
+  return args.reduce(add, 0);
+}, integer_starting_from(1), integer_starting_from(2), integer_starting_from(3));
+
+console.assert(stream_ref(sum_stream, 2)===12);
+
+function add_stream(s1, s2) {
+  return stream_map(add, s1, s2);
+}
+
+var ones = cons_stream(1, function() {
+  return ones;
+});
+console.assert(stream_ref(ones, 100)===1);
+
+var integers = cons_stream(1, function() {
+  return add_stream(ones, integers);
+});
+console.assert(stream_ref(integers, 10)===11);
+
+var fibs = cons_stream(0, function() {
+  return cons_stream(1, function() {
+    return add_stream(stream_cdr(fibs), fibs);
+  });
+});
+
+console.assert(stream_ref(fibs, 6)===8);
+
+
