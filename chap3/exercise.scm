@@ -564,4 +564,17 @@
 (stream-ref x 7)
 ; 6 7 because stream is consumed subsequently
 
+;;; Ex 3.54
+
+(define (add-streams s1 s2)
+  (stream-map + s1 s2))
+(define ones (cons-stream 1 ones))
+(define integers (cons-stream 1 (add-streams ones integers)))
+
+(define (mul-streams s1 s2)
+  (stream-map * s1 s2))
+(define factorials (cons-stream 1 (mul-streams (add-streams ones integers) factorials)))
+
+(stream-ref factorials 3)
+
 
