@@ -687,3 +687,7 @@
 
 (display-stream-until (all-pairs integers integers) 30)
 
+;;; Ex 3.68
+
+; Infinite recursive call happens
+
