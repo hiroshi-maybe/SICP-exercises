@@ -691,3 +691,27 @@
 
 ; Infinite recursive call happens
 
+;;; Ex 3.69
+
+(define (triples s t u)
+  (cons-stream
+   (list (stream-car s) (stream-car t) (stream-car u))
+   (interleave
+    (stream-map (lambda (pair) (list (stream-car s) (car pair) (cadr pair)))
+                (stream-cdr (pairs t u)))
+    (triples (stream-cdr s) (stream-cdr t) (stream-cdr u)))))
+
+(define triple-integers (triples integers integers integers))
+
+(define pythagorean-triples
+  (stream-filter (lambda (triple)
+		   (let ((x (car triple))
+			 (y (cadr triple))
+			 (z (caddr triple)))
+		     (eq? (+ (square x) (square y)) (square z))))
+		 triple-integers))
+
+(display-stream-until (triples integers integers integers) 30)
+(display-stream-until pythagorean-triples 5)
+
+
