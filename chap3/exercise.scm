@@ -748,9 +748,9 @@
 ; b
 (define (non-divisible n) 
   (lambda (x) (not (= (remainder x n) 0))))
-(define divisible-235 (stream-filter (non-divisible 2)
+(define divisible-235 (stream-filter (non-divisible 5)
 				     (stream-filter (non-divisible 3)
-						    (stream-filter (non-divisible 5) integers))))
+						    (stream-filter (non-divisible 2) integers))))
 
 (display-stream-until (weighted-pairs divisible-235 divisible-235
 				      (lambda (pair) 
