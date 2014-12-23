@@ -760,9 +760,11 @@
 ; (1 1) (1 7) (1 11) (1 13) (1 17) (1 19) (1 23) (1 29) (1 31) (7 7)
 
 ;;; Ex 3.71
-(define (ramanujan-weight i j) (+ (* i i i) (* j j j)))
-(define (ramanujan-weight-from-pair pair)
-  (ramanujan-weight (car pair) (cadr pair)))
+(define (cube x) (* x x x))
+(define (ramanujan-weight i j) (+ (cube i) (cube j)))
+(define (from-pair proc)
+  (lambda (pair) (proc (car pair) (cadr pair))))
+(define (ramanujan-weight-from-pair pair) ((from-pair ramanujan-weight) pair))
 (define ramanujan-weighted-pairs (weighted-pairs integers integers ramanujan-weight-from-pair))
 
 (define (search-ramanujan s)
@@ -779,3 +781,21 @@
 (display-stream-until ramanujan-numbers 5)
 ; 1729 4104 13832 20683 32832 39312
 
+;;; Ex 3.72
+(define (square-sum i j) (+ (square i) (square j))) 
+(define (square-sum-from-pair pair) ((from-pair square-sum) pair))
+(define square-sum-weighted-pairs (weighted-pairs integers integers square-sum-from-pair))
+
+(define (search-square-sum-3way s)
+  (let ((pair1 (stream-car s))
+	(pair2 (stream-car (stream-cdr s)))
+	(pair3 (stream-car (stream-cdr (stream-cdr s)))))
+    (if (= (square-sum-from-pair pair1) (square-sum-from-pair pair2) (square-sum-from-pair pair3))
+	(let ((num (square-sum-from-pair pair1)))
+	  (cons-stream num
+		       (stream-filter (lambda (x) (> x num)) (search-square-sum-3way (stream-cdr s)))))
+	(search-square-sum-3way (stream-cdr s)))))
+
+(define square-sum-3way-numbers (search-square-sum-3way square-sum-weighted-pairs))
+(display-stream-until square-sum-3way-numbers 5)
+; 325 425 650 725 845
