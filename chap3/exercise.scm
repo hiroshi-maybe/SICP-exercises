@@ -379,7 +379,7 @@
   (let ((d (make-wire)) (e (make-wire)))
     (or-gate a b d)
     (and-gate a b c)
-    (inverter c e)
+    i(nverter c e)
     (and-gate d e s)
     'ok))
 
@@ -712,6 +712,55 @@
 		 triple-integers))
 
 (display-stream-until (triples integers integers integers) 30)
-(display-stream-until pythagorean-triples 5)
+(display-stream-until pythagorean-triples 2)
+
+;;; Ex 3.70
+
+(define (merge-weighted s1 s2 weight)
+  (cond ((stream-null? s1) s2)
+        ((stream-null? s2) s1)
+        (else
+         (let ((s1car (stream-car s1))
+               (s2car (stream-car s2)))
+	   (let ((s1weight (weight s1car))
+		 (s2weight (weight s2car)))
+	     (cond ((< s1weight s2weight)
+		    (cons-stream s1car (merge-weighted (stream-cdr s1) s2 weight)))
+		   ((> s1weight s2weight)
+		    (cons-stream s2car (merge-weighted s1 (stream-cdr s2) weight)))
+		   (else
+		    (cons-stream s1car (merge-weighted (stream-cdr s1) s2 weight)))))))))
+
+(define (weighted-pairs s t weight)
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (merge-weighted
+    (stream-map (lambda (x) (list (stream-car s) x))
+                (stream-cdr t))
+    (weighted-pairs (stream-cdr s) (stream-cdr t) weight)
+    weight)))
+
+; a
+(display-stream-until (weighted-pairs integers integers
+				      (lambda (pair) (+ (car pair) (cadr pair)))) 10)
+; (1 1) (1 2) (1 3) (2 2) (1 4) (2 3) (1 5) (2 4) (3 3) (1 6)
+
+; b
+(define (non-divisible n) 
+  (lambda (x) (not (= (remainder x n) 0))))
+(define divisible-235 (stream-filter (non-divisible 2)
+				     (stream-filter (non-divisible 3)
+						    (stream-filter (non-divisible 5) integers))))
+
+(display-stream-until (weighted-pairs divisible-235 divisible-235
+				      (lambda (pair) 
+					(let ((i (car pair))
+					      (j (cadr pair)))
+					  (+ (* 2 i) (* 3 j) (* 5 i j))))) 10)
+; (1 1) (1 7) (1 11) (1 13) (1 17) (1 19) (1 23) (1 29) (1 31) (7 7)
+
+
+
+
 
 
