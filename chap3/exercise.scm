@@ -759,8 +759,23 @@
 					  (+ (* 2 i) (* 3 j) (* 5 i j))))) 10)
 ; (1 1) (1 7) (1 11) (1 13) (1 17) (1 19) (1 23) (1 29) (1 31) (7 7)
 
+;;; Ex 3.71
+(define (ramanujan-weight i j) (+ (* i i i) (* j j j)))
+(define (ramanujan-weight-from-pair pair)
+  (ramanujan-weight (car pair) (cadr pair)))
+(define ramanujan-weighted-pairs (weighted-pairs integers integers ramanujan-weight-from-pair))
 
+(define (search-ramanujan s)
+  (let ((pair1 (stream-car s))
+	(pair2 (stream-car (stream-cdr s))))
+    (if (= (ramanujan-weight-from-pair pair1) (ramanujan-weight-from-pair pair2))
+	(let ((ramanujan-num (ramanujan-weight-from-pair pair1)))
+	  (cons-stream ramanujan-num
+		       (stream-filter (lambda (x) (> x ramanujan-num)) (search-ramanujan (stream-cdr s)))))
+	(search-ramanujan (stream-cdr s)))))
 
+(define ramanujan-numbers (search-ramanujan ramanujan-weighted-pairs))
 
-
+(display-stream-until ramanujan-numbers 5)
+; 1729 4104 13832 20683 32832 39312
 
