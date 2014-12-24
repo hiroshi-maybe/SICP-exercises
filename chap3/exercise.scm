@@ -799,3 +799,9 @@
 (define square-sum-3way-numbers (search-square-sum-3way square-sum-weighted-pairs))
 (display-stream-until square-sum-3way-numbers 5)
 ; 325 425 650 725 845
+
+;;; Ex 3.74
+
+(define zero-crossings (stream-map sign-change-detector
+				   sense-data
+				   (cons-stream 0 sense-data)))
