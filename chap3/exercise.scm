@@ -812,3 +812,18 @@
 		 (make-zero-crossings (stream-cdr input-stream)
 				      (stream-car input-stream)
                                       avpt))))
+
+;;; Ex 3.76
+(define (average x y)
+  (/ (+ x y) 2))
+(define (smooth s)
+  (let ((v1 (stream-car s))
+	(v2 (stream-car (stream-cdr s))))
+    (cons-stream (average v1 v2)
+		 (smooth (stream-cdr s)))))
+
+(define smooth-data (smooth sense-data))
+(define zero-crossings (stream-map sign-change-detector
+				   smooth-data
+				   (cons-stream 0 smooth-data)))
+
