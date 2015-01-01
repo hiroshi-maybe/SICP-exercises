@@ -860,3 +860,33 @@
 			     command-stream)))
   random-numbers)
 
+;;; Ex 3.82
+
+(define (random-in-range low high)
+  (let ((range (- high low)))
+    (+ low (random range))))
+
+; TODO: Use random stream
+(define (monte-carlo experiment)
+  (define (monte-carlo-probs trials-total trials-passed)
+    (let ((total-new  (+ trials-total 1))
+	  (passed-new (+ trials-passed (if (experiment) 1 0))))
+      (cons-stream (/ passed-new total-new)
+		   (monte-carlo-probs total-new passed-new))))
+  (monte-carlo-probs 0 0))
+
+(define (estimate-integral P x1 x2 y1 y2)
+  (define (experiment)
+    (P (random-in-range x1 x2)
+       (random-in-range y1 y2)))
+  (monte-carlo experiment))
+
+(define x1 -1.0)
+(define y1 -1.0)
+(define x2 1.0)
+(define y2 1.0)
+(define area (* (- x2 x1) (- y2 y1)))
+(define pi-stream (scale-stream (estimate-integral (lambda (x y) (< (+ (square x) (square y)) 1.0))
+			       x1 x2 y1 y2) area))
+
+(stream-ref pi-stream 100000)
