@@ -845,3 +845,18 @@
   (define ddy (add-streams (scale-stream dy a) (scale-stream y b)))
   y)
 
+;;; Ex 3.81
+
+(define (random-number-generator command-stream)
+  (define random-numbers
+    (cons-stream random-init
+		 (stream-map (lambda (n command)
+			       (cond ((eq? command 'generate) (rand-update n))
+				     ((and (pair? command)
+					   (eq? (car command) 'reset))
+				      (cadr command))
+				     (else (error "invalid command: " commmand))))
+			     random-numbers
+			     command-stream)))
+  random-numbers)
+
