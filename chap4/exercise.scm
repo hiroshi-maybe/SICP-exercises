@@ -16,3 +16,11 @@
       (let ((right (list-of-values-rl (rest-operands exps) env)))
 	(let ((left (eval (first-operand exps) env)))
 	  (cons right left)))))
+
+;;; Ex 4.2
+
+; b
+(define (application-call? exp) (tagged-list? exp 'call))
+(define (operator-call exp) (cadr exp))
+(define (operands-call exp) (cddr exp))
+
