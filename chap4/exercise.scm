@@ -58,8 +58,8 @@
   (cond ((self-evaluating? exp) exp)
 	((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
-	((and? exp) (eval (and->if exp) env))
-	((or?  exp) (eval (or->if  exp) env))
+	((and? exp) (eval-4.5 (and->if exp) env))
+	((or?  exp) (eval-4.5 (or->if  exp) env))
 ;; other syntax procedures ;;
 	))
 
@@ -84,7 +84,7 @@
 	       true
 	       (expand-or-operands (cdr operands)))))
 
-; Ex 4.5
+;;; Ex 4.5
 (define (expand-clauses clauses)
   (if (null? clauses)
       'false                          ; no else clause
@@ -100,3 +100,26 @@
 			 (list (cadr (cond-actions first)) (cond-predicate first))
 			 (sequence->exp (cond-actions first)))
                      (expand-clauses rest))))))
+
+;;; Ex 4.6
+(define (eval-4.6 exp env)
+  (cond ((self-evaluating? exp) exp)
+	((variable? exp) (lookup-variable-value exp env))
+        ((quoted? exp) (text-of-quotation exp))
+	((let?  exp) (eval-4.6 (let->combination  exp) env))
+;; other syntax procedures ;;
+	))
+
+(define (let-bindings exp) (cadr exp))
+(define (let-bound-names exp)
+  (map car (let-bindings exp)))
+(define (let-bound-values exp)
+  (map cadr (let-bindings exp)))
+(define (let-body  exp) (cddr exp))
+
+(define (let->combination exp)
+  (cons (make-lambda (let-bound-names exp)
+		     (let-body exp))
+	(let-bound-values exp)))
+
+
