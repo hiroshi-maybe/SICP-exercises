@@ -157,3 +157,16 @@
       (cons (make-lambda (let-bound-names exp)
 			 (let-body exp))
 	    (let-bound-values exp))))
+
+;;; Ex 4.9
+
+(define (while? exp) (tagged-list? expr 'while))
+(define (while-cond exp) (cadr exp))
+(define (while-body exp) (caddr exp))
+(define (while->combination exp)
+  (make-define 'while-iterate '()
+	       (make-if (while-cond exp)
+			(sequence->exp (cons (while-body exp)
+					     (list 'while-iterate)))
+			'done))
+  (list 'while-iterate))
