@@ -115,11 +115,25 @@
   (map car (let-bindings exp)))
 (define (let-bound-values exp)
   (map cadr (let-bindings exp)))
-(define (let-body  exp) (cddr exp))
+(define (let-body exp) (caddr exp))
 
 (define (let->combination exp)
   (cons (make-lambda (let-bound-names exp)
 		     (let-body exp))
 	(let-bound-values exp)))
 
+;;; Ex 4.7
+
+(define (make-let bindings body)
+  (list 'let bindings body))
+
+(define (let*-bindings exp) (cadr exp))
+(define (let*-body exp) (caddr exp))
+(define (let*->nested-lets exp)
+  (let ((bindings (let*-bindings exp)))
+    (define (iterate bindings)
+      (if (null? bindings)
+	  (let*-body exp)
+	  (make-let (list (car bindings)) (iterate (cdr bindings)))))
+    (iterate (let*-bindings))))
 
