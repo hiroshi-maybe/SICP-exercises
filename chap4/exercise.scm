@@ -137,3 +137,23 @@
 	  (make-let (list (car bindings)) (iterate (cdr bindings)))))
     (iterate (let*-bindings))))
 
+;;; Ex 4.8
+
+(define (named-let? exp) (and (let? exp) (not (pair? (cadr exp)))))
+(define (named-let-fun exp) (cadr exp))
+(define (named-let-bindings exp) (caddr exp))
+(define (named-let-params exp) (map car (named-let-bindings exp)))
+(define (named-let-vals exp) (map cadr (named-let-bindings exp)))
+(define (named-let-body exp) (cadddr exp))
+
+(define (make-define name params body)
+  (list 'define (cons name params) body))
+
+(define (let->combination-ex exp)
+  (if (named-let? exp)
+      (sequence->exp
+       (list (make-define (named-let-fun exp) (named-let-params exp) (named-let-body exp))
+	     (cons (named-let-fun exp) (named-let-fun-vals exp))))
+      (cons (make-lambda (let-bound-names exp)
+			 (let-body exp))
+	    (let-bound-values exp))))
