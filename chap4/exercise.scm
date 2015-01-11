@@ -283,3 +283,24 @@
     (scan (frame-variables frame)
           (frame-values frame)
 	  '() '())))
+
+;;; Ex 4.15
+
+(define (run-forever) (run-forever))
+
+(define (try p)     ; x
+  (if (halts? p p)
+      (run-forever) ; y
+      'halted))     ; z
+
+; i)  (try try) halts
+;    If (try try) is called by x
+;       then (halts? try try) should be true
+;            However, it runs forever by y
+; ii) (try try) does NOT halt
+;    If (try try) is called by x
+;       then (halts? try try) should be false
+;            However, it stops by z
+;
+; Therefore, inconsistent in any case. We cannot define universal `halts?`
+
