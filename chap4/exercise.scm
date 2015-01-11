@@ -179,7 +179,7 @@
 (define (bound-var binding) (car binding))
 (define (bound-val binding) (cdr binding))
 (define (add-binding-to-frame! var val frame)
-  (set-car! (make-binding var val) frame))
+  (set-car! (make-binding var val) (frame-bindings frame)))
 (define (extend-environment bindings base-env)
   (cons (make-frame bindings) base-env))
 
@@ -221,3 +221,43 @@
              (set-car! bindings (make-binding var val)))
             (else (scan (cdr bindings))))))
     (scan (frame-bindings frame))))
+
+;;; Ex 4.12
+
+(define (scan-frame var frame found-proc not-found-proc)
+  (define (scan vars vals)
+    (cond ((null? vars)
+	   (not-found-proc vars vals frame))
+	  ((eq? var (car vars))
+	   (found-proc vars vals frame))
+	  (else (scan (cdr vars) (cdr vals)))))
+  (scan (frame-variables frame)
+	(frame-values frame)))
+
+(define (define-variable! var val env)
+  (let ((frame (first-frame env)))
+    (scan-frame var frame
+		(lambda (vars vals frame)
+		  (set-car! vals val))
+		(lambda (vars vals frame)
+		  (add-binding-to-frame! var val frame)))))
+
+(define (iterate-env env var found-proc)
+  (define (env-loop env)
+    (if (eq? env the-empty-environment)
+        (error "Unbound variable" var)
+	(scan-frame var (first-frame env)
+		found-proc
+		(lambda (vars vals frame)
+		  (env-loop (enclosing-environment env))))))
+  (env-loop env))
+
+(define (lookup-variable-value var env)
+  (iterate-env env var
+	       (lambda (vars vals frame)
+		 (car vals))))
+
+(define (set-variable-value! var val env)
+  (iterate-env env var
+	       (lambda (vars vals frame)
+		 (set-car! vals val))))
