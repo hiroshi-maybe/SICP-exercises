@@ -261,3 +261,25 @@
   (iterate-env env var
 	       (lambda (vars vals frame)
 		 (set-car! vals val))))
+
+;;; Ex 4.13
+
+; should unbind from first frame so that `unbind` should not break outer environment
+(define (set-frame! frame env)
+  (set-car! frame env))
+
+(define (make-unbind! var env)
+  (let ((frame (first-frame env)))
+    (define (scan vars vals new-vars new-vals)
+      (cond ((null? vars)
+	     (error "Unbound variable" var)
+	    ((eq? var (car vars))
+             (set-frame! (make-frame (append new-vars (cdr vars))
+				     (append new-vals (cdr vals))) env))
+            (else (scan (cdr vars) 
+			(cdr vals)
+			(cons var new-vars)
+			(cons val new-vals))))))
+    (scan (frame-variables frame)
+          (frame-values frame)
+	  '() '())))
