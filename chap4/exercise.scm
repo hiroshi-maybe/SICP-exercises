@@ -354,3 +354,6 @@
 ; c
 (define (make-procedure parameters body env)
   (list 'procedure parameters (scan-out-defines body) env))
+
+;;; Ex 4.17
+;This is explaining about hoisting behavior in a function scope
