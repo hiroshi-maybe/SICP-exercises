@@ -357,3 +357,46 @@
 
 ;;; Ex 4.17
 ;This is explaining about hoisting behavior in a function scope
+
+;;; Ex 4.20
+
+; a
+(define (letrec? exp) (tagged-list? exp 'letrec))
+(define (letrec-bindings exp) (cadr exp))
+(define (letrec-body exp) (cddr exp))
+(define (letrec-params exp) (map car (named-let-bindings exp)))
+(define (letrec-vals exp) (map cadr (named-let-bindings exp)))
+(define (make-define-var var val) (list 'define var val))
+(define (letrec->let exp)
+  (let ((params (letrec-params exp)))
+    (make-let (map (lambda (var) (make-define-var var '*unassigned*)) params)
+	      (make-begin (append (map make-assignment params (letrec-vals exp)) (letrec-body exp))))))
+
+; b
+; In `let` binding functions, variable names referred in the body of the bound functions are out of frames of `let`
+;(define (f x)
+;  (let ((even?                                                 ; `let` (not `letrec`)
+;            (lambda (n)
+;              (if (= n 0)
+;		  true
+;                  (odd? (- n 1)))))                            ; cannot find `odd?` in this lexical scope
+;           (odd?
+;	    (lambda (n)
+;	      (if (= n 0)
+;                  false
+;                   (even? (- n 1)))))) <rest of body of f>))   ; cannot find `even?` in this lexical scope
+;
+; If `letrec` is used, `odd?` and `even?` are found because declaration of them are located in the lexical scope.
+;
+; This works almost as well as internal `define`.
+;(define (f x)
+;  (define even? (lambda (n)
+;		  (if (= n 0)
+;		      true
+;		      (odd? (- n 1))))) ; `odd?` is found in this lexical scope
+;  (define odd? (lambda (n)
+;		 (if (= n 0)
+;		     false
+;		     (even? (- n 1))))) ; `even?` is found in this lexical scope
+;  <rest of body of f>)
+
