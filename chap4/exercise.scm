@@ -424,8 +424,8 @@
 ; b
 
 (define (even-Y? x)
-  ((lambda (even? odd?)
-     (even? even? odd? x))
+  ((lambda (even? odd?) 
+     (even? even? odd? x)) ; keep copy of original even? and odd? in 2nd and 3rd args
    (lambda (ev? od? n) ; bound to even?
      (if (= n 0) true  (od? ev? od? (- n 1))))
    (lambda (ev? od? n) ; bound to odd?
