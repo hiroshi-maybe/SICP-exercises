@@ -400,3 +400,33 @@
 ;		     (even? (- n 1))))) ; `even?` is found in this lexical scope
 ;  <rest of body of f>)
 
+;;; Ex 4.21
+
+((lambda (n)
+   ((lambda (fact)
+      (fact fact n))
+    (lambda (ft k)
+      (if (= k 1) 1
+	  (* k (ft ft (- k 1)))))))
+ 10)
+
+; a
+
+((lambda (n)
+   ((lambda (fib)
+      (fib fib n))
+    (lambda (fb k) ; bound to fib
+      (cond ((= k 1) 0)
+	    ((= k 2) 1)
+	    (else (+ (fb fb (- k 2)) (fb fb (- k 1))))))))
+ 10)
+
+; b
+
+(define (even-Y? x)
+  ((lambda (even? odd?)
+     (even? even? odd? x))
+   (lambda (ev? od? n) ; bound to even?
+     (if (= n 0) true  (od? ev? od? (- n 1))))
+   (lambda (ev? od? n) ; bound to odd?
+     (if (= n 0) false (ev? ev? od? (- n 1))))))
