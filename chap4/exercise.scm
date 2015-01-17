@@ -430,3 +430,13 @@
      (if (= n 0) true  (od? ev? od? (- n 1))))
    (lambda (ev? od? n) ; bound to odd?
      (if (= n 0) false (ev? ev? od? (- n 1))))))
+
+;;; Ex 4.22
+
+(define (analyze-4.22 exp)
+  (cond ((self-evaluating? exp)
+	 ;; 
+	 ((let? exp) (analyze-4.22 (let->combination exp)))
+	 ;;
+	 )))
+
