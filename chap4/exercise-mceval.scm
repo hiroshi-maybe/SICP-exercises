@@ -1,5 +1,5 @@
 
-(load "ch4.scm")
+(load "ch4-mceval.scm")
 
 ;;; Ex 4.1
 
@@ -35,7 +35,7 @@
 	((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
 	((and? exp) (eval-and exp env))
-	((or?   or) (eval-or  exp env))
+	((or?  exp) (eval-or  exp env))
 ;; other syntax procedures ;;
 	))
 
@@ -58,8 +58,8 @@
   (cond ((self-evaluating? exp) exp)
 	((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
-	((and? exp) (eval-4.5 (and->if exp) env))
-	((or?  exp) (eval-4.5 (or->if  exp) env))
+	((and? exp) (eval-4.4.2 (and->if exp) env))
+	((or?  exp) (eval-4.4.2 (or->if  exp) env))
 ;; other syntax procedures ;;
 	))
 
@@ -102,6 +102,9 @@
                      (expand-clauses rest))))))
 
 ;;; Ex 4.6
+
+(define (let? exp) (tagged-list? exp 'let))
+
 (define (eval-4.6 exp env)
   (cond ((self-evaluating? exp) exp)
 	((variable? exp) (lookup-variable-value exp env))
@@ -123,6 +126,8 @@
 	(let-bound-values exp)))
 
 ;;; Ex 4.7
+
+(define (let*? exp) (tagged-list? exp 'let*))
 
 (define (make-let bindings body)
   (list 'let bindings body))
@@ -160,7 +165,7 @@
 
 ;;; Ex 4.9
 
-(define (while? exp) (tagged-list? expr 'while))
+(define (while? exp) (tagged-list? exp 'while))
 (define (while-cond exp) (cadr exp))
 (define (while-body exp) (caddr exp))
 (define (while->combination exp)
@@ -173,15 +178,15 @@
 
 ;;; Ex 4.11
 
-(define (make-frame bindings) bindings)
+(define (make-frame-ex bindings) bindings)
 (define (frame-bindings frame) frame)
 (define (make-binding var val) (cons var val))
 (define (bound-var binding) (car binding))
 (define (bound-val binding) (cdr binding))
 (define (add-binding-to-frame! var val frame)
   (set-car! (make-binding var val) (frame-bindings frame)))
-(define (extend-environment bindings base-env)
-  (cons (make-frame bindings) base-env))
+(define (extend-environment-ex bindings base-env)
+  (cons (make-frame-ex bindings) base-env))
 
 (define (lookup-variable-value var env)
   (define (env-loop env)
@@ -431,12 +436,35 @@
    (lambda (ev? od? n) ; bound to odd?
      (if (= n 0) false (ev? ev? od? (- n 1))))))
 
-;;; Ex 4.22
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; `eval` extended by exercises
+(define (eval exp env)
+  (cond ((self-evaluating? exp) exp)
+        ((variable? exp) (lookup-variable-value exp env))
+        ((quoted? exp) (text-of-quotation exp))
+        ((assignment? exp) (eval-assignment exp env))
+        ((definition? exp) (eval-definition exp env))
+        ((if? exp) (eval-if exp env))
+        ((lambda? exp)
+         (make-procedure (lambda-parameters exp)
+                         (lambda-body exp)
+                         env))
+        ((begin? exp) 
+         (eval-sequence (begin-actions exp) env))
+        ((cond? exp) (eval (cond->if exp) env))
+	;; extension start ;;
+	((and? exp) (eval (and->if exp) env))
+	((or?  exp) (eval (or->if  exp) env))
+	((let*? exp) (eval (let*->nested-lets exp) env))
+	((letrec? exp) (eval (letrec->let exp) env))
+	((let? exp) (eval (let->combination-ex exp) env))
+	((while? exp) (eval (while->combination exp) env))
+	;;  extension end  ;;
+        ((application? exp)
+         (apply (eval (operator exp) env)
+                (list-of-values (operands exp) env)))
+        (else
+         (error "Unknown expression type -- EVAL" exp))))
 
-(define (analyze-4.22 exp)
-  (cond ((self-evaluating? exp)
-	 ;; 
-	 ((let? exp) (analyze-4.22 (let->combination exp)))
-	 ;;
-	 )))
-
+;(define the-global-environment (setup-environment))
+;(driver-loop)

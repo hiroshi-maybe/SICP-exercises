@@ -20,7 +20,10 @@
 ;;**implementation-dependent loading of evaluator file
 ;;Note: It is loaded first so that the section 4.1.7 definition
 ;; of eval overrides the definition from 4.1.1
-(load "ch4-mceval.scm")
+
+;; ! load extended mceval !
+;(load "ch4-mceval.scm")
+(load "exercise-mceval.scm")
 
 ;;;SECTION 4.1.7
 
