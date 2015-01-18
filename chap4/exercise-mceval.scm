@@ -283,8 +283,8 @@
 				     (append new-vals (cdr vals))) env))
             (else (scan (cdr vars) 
 			(cdr vals)
-			(cons var new-vars)
-			(cons val new-vals))))))
+			(cons (car vars) new-vars)
+			(cons (car vals) new-vals))))))
     (scan (frame-variables frame)
           (frame-values frame)
 	  '() '())))
@@ -312,7 +312,7 @@
 ;;; Ex 4.16
 
 ; a
-(define black-list-value '*unassigned*)
+(define black-list-value (list '*unassigned*))
 (define (valid-val? var)
   (if (memq var black-list-value)
       false
@@ -324,9 +324,9 @@
       (cond ((null? vars)
              (env-loop (enclosing-environment env)))
             ((eq? var (car vars))
-	     (if (valid-val? val)
+	     (if (valid-val? (car vals))
 		 (car vals)
-		 (error "Invalid variable value" val)))
+		 (error "Invalid variable value" (car vals))))
             (else (scan (cdr vars) (cdr vals)))))
     (if (eq? env the-empty-environment)
         (error "Unbound variable" var)
