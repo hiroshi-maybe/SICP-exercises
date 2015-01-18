@@ -149,6 +149,12 @@
 ;; A longer list of primitives -- suitable for running everything in 4.2
 ;; Overrides the list in ch4-mceval.scm
 
+; for bench-mark
+(define (fib n)
+  (cond ((= n 0) 0)
+        ((= n 1) 1)
+        (else (+ (fib (- n 1)) (fib (- n 2))))))
+
 (define primitive-procedures
   (list (list 'car car)
         (list 'cdr cdr)
@@ -162,6 +168,8 @@
         (list '= =)
         (list 'newline newline)
         (list 'display display)
+        (list 'fib fib)
+	(list 'get-universal-time get-universal-time)
 ;;      more primitives
         ))
 
