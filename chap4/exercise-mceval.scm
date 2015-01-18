@@ -436,6 +436,20 @@
    (lambda (ev? od? n) ; bound to odd?
      (if (= n 0) false (ev? ev? od? (- n 1))))))
 
+;;; Ex 4.26
+
+(define (unless? exp) (tagged-list? exp 'unless))
+(define (unless-predicate exp) (cadr exp))
+(define (unless-consequent exp) (caddr exp))
+(define (unless-alternative exp)
+  (if (not (null? (cdddr exp)))
+      (cadddr exp)
+      'false))
+(define (unless->if exp)
+  (make-if (unless-predicate exp)
+	   (unless-alternative)
+	   (unless-consequent)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; `eval` extended by exercises
 (define (eval exp env)
@@ -459,6 +473,7 @@
 	((letrec? exp) (eval (letrec->let exp) env))
 	((let? exp) (eval (let->combination-ex exp) env))
 	((while? exp) (eval (while->combination exp) env))
+	((unless? exp) (eval (unless->if exp) env))
 	;;  extension end  ;;
         ((application? exp)
          (apply (eval (operator exp) env)
