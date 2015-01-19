@@ -43,5 +43,20 @@
 ; memoized:   1
 ; no-memoize: 2
 
+;;; Ex 4.30
+
+; b
+; Original:
+;   (p1 1) = (1 2)
+;   (p2 1) = 1 because `e` in the `p` func is just a thunk: ('thunk '(set! x (cons x '(2))) env)
+; Cy's:
+;   (p1 1) = (1 2)
+;   (p2 1) = (1 2) because `e` in the `p` func is forced
+
+; d
+; I prefer to provide options for programmers as below:
+;  1: default lazy evaluation with purely functional programming language including strict evalution option
+;  2: default strict evaluation including lazy evalution option
+
 (define the-global-environment (setup-environment))
 (driver-loop)
