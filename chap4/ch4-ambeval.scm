@@ -317,6 +317,8 @@
         (list 'eq? eq?)
 ;;      more primitives
         (list '<= <=)
+        (list '< <)
+        (list 'display display)
         ))
 
 'AMB-EVALUATOR-LOADED

@@ -304,5 +304,55 @@
 ;(yatch-puzzle-2)
 ; **** 2 patterns
 
+;;; Ex 4.44
+
+; **** This code is not efficient enough to solve 8-queens in a reasonable time ****
+; Solves 6-queens but cannot more. Need more backtrack optimization
+(pre-eval
+ (define (replicate make-val num)
+   (if (= num 0)
+       '()
+       (cons (make-val) (replicate make-val (- num 1))))))
+
+(pre-eval
+ (define (valid-diagonally? board-state board-size)
+   (define (valid-rest? origin-row offset rows)
+     (if (null? rows)
+	 true
+	 (let ((tested-row (car rows))
+	       (invalid-neg (- origin-row offset))
+	       (invalid-pos (+ origin-row offset)))
+	   (if (and (not (= invalid-neg tested-row))
+		    (not (= invalid-pos tested-row)))
+	       (valid-rest? origin-row (+ offset 1) (cdr rows))
+	       false))))
+   (if (null? board-state)
+       true
+       (let ((current-row (car board-state)))
+	 (if (valid-rest? current-row 1 (cdr board-state))
+	     (valid-diagonally? (cdr board-state) board-size)
+	     false)))))
+
+(pre-eval
+ (define (queens board-size)
+   (let ((board-state (replicate (lambda () (an-integer-between 1 board-size)) board-size)))
+     (require (distinct? board-state)) ; validate horizontal position
+     (require (valid-diagonally? board-state board-size))
+     board-state)))
+
+;;; Amb-Eval input:
+;(queens 4)
+;;; Starting a new problem 
+;;; Amb-Eval value:
+;(2 4 1 3)
+;;; Amb-Eval input:
+;try-again
+;;; Amb-Eval value:
+;(3 1 4 2)
+;;; Amb-Eval input:
+;try-again
+;;; There are no more values of
+;(queens 4)
+
 ;;; START REPL
 (driver-loop)
