@@ -220,5 +220,30 @@
 
 (pretty-print (multiple-dwelling))
 
+;;; Ex 4.42
+(pre-eval
+ (define (xor p1 p2)
+   (or (and (not p1) p2) (and p1 (not p2)))))
+
+(pre-eval
+ (define (liars-puzzle)
+   (let ((b (amb 1 2 3 4 5))
+	 (e (amb 1 2 3 4 5))
+	 (j (amb 1 2 3 4 5))
+	 (k (amb 1 2 3 4 5))
+	 (m (amb 1 2 3 4 5)))
+     (require
+      (distinct? (list b e j k m)))
+     (require (xor (= k 2) (= b 3)))
+     (require (xor (= e 1) (= j 2)))
+     (require (xor (= j 3) (= e 5)))
+     (require (xor (= k 2) (= m 4)))
+     (require (xor (= m 4) (= b 1)))
+     (list (list 'Betty b)
+	   (list 'Ethel e)
+	   (list 'Joan j)
+	   (list 'Kitty k)
+	   (list 'Mary m)))))
+
 ;;; START REPL
-;(driver-loop)
+(driver-loop)

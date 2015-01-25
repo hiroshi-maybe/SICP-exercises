@@ -26,8 +26,33 @@
 ;;**implementation-dependent loading of evaluator file
 ;;Note: It is loaded first so that the section 4.2 definition
 ;; of eval overrides the definition from 4.1.1
+
 (load "ch4-mceval.scm")
 
+;;;; !!! Added `and` and `or` for Ex 4.41 !!! ;;;;
+(define (and? exp) (tagged-list? exp 'and))
+(define (or?  exp) (tagged-list? exp 'or))
+
+(define (and-operands exp) (cdr exp))
+(define (or-operands  exp) (cdr exp))
+
+(define (and->if exp)
+  (expand-and-operands (and-operands exp)))
+(define (expand-and-operands operands)
+  (if (null? operands)
+      'true
+      (make-if (car operands)
+	       (expand-and-operands (cdr operands))
+	       'false)))
+
+(define (or->if exp)
+  (expand-or-operands (or-operands exp)))
+(define (expand-or-operands operands)
+  (if (null? operands)
+      'false
+      (make-if (car operands)
+	       'true
+	       (expand-or-operands (cdr operands)))))
 
 
 ;;;Code from SECTION 4.3.3, modified as needed to run it
@@ -48,6 +73,8 @@
         ((lambda? exp) (analyze-lambda exp))
         ((begin? exp) (analyze-sequence (begin-actions exp)))
         ((cond? exp) (analyze (cond->if exp)))
+        ((and? exp) (analyze (and->if exp)))
+        ((or? exp) (analyze (or->if exp)))
         ((let? exp) (analyze (let->combination exp))) ;**
         ((amb? exp) (analyze-amb exp))                ;**
         ((application? exp) (analyze-application exp))
@@ -291,6 +318,5 @@
 ;;      more primitives
         (list '<= <=)
         ))
-
 
 'AMB-EVALUATOR-LOADED
