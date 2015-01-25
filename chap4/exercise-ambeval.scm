@@ -17,7 +17,7 @@
  (define (require p)
    (if (not p) (amb))))
 
-;;; Ex 4.36
+;;; Ex 4.35
 (pre-eval
  (define (an-integer-between low high)
    (require (<= low high))
@@ -42,7 +42,19 @@
 ;;; Amb-Eval value:
 ;(5 12 13)
 
+;;; Ex 4.36
 
+(pre-eval
+ (define (an-integer-starting-from n)
+   (amb n (an-integer-starting-from (+ n 1)))))
+
+(pre-eval
+ (define (a-pythagorean-triple-from low)
+   (let ((k (an-integer-starting-from low)))
+     (let ((i (an-integer-between low k)))
+       (let ((j (an-integer-between i k)))
+	 (require (= (+ (* i i) (* j j)) (* k k)))
+	 (list i j k))))))
 
 ;;; START REPL
 (driver-loop)
