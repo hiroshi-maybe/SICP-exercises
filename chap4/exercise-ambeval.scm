@@ -245,5 +245,64 @@
 	   (list 'Kitty k)
 	   (list 'Mary m)))))
 
+;;; Ex 4.43
+(pre-eval
+ (define (yatch-puzzle-1)
+   (let ((m (amb 'ma))
+	 (c (amb 'l 'r 'g))
+	 (h (amb 'l 'g))
+	 (b (amb 'me))
+	 (p (amb 'l 'r)))
+     (require
+      (distinct? (list m c h b p)))
+     (require (or (and (eq? c 'g) (eq? p 'me))
+		  (and (eq? h 'g) (eq? p 'r))))
+     (list (list 'Moore m)
+	   (list 'Colonel c)
+	   (list 'Hall h)
+	   (list 'Barnacle b)
+	   (list 'Parker p)))))
+
+;;; Starting a new problem 
+;;; Amb-Eval value:
+;((moore ma) (colonel l) (hall g) (barnacle me) (parker r))
+;;; Amb-Eval input:
+;try-again
+;;; There are no more values of
+;(yatch-puzzle-1)
+; **** Lorna's father is 'Colonel Downing'
+
+(pre-eval
+ (define (yatch-puzzle-2)
+   (let ((m (amb 'ma 'r 'g))
+	 (c (amb 'l 'r 'g 'ma))
+	 (h (amb 'l 'g 'ma))
+	 (b (amb 'me))
+	 (p (amb 'l 'r)))
+     (require
+      (distinct? (list m c h b p)))
+     (require (or (and (eq? c 'g) (eq? p 'me))
+		  (and (eq? h 'g) (eq? p 'r))
+		  (and (eq? m 'g) (eq? p 'l))))
+     (list (list 'Moore m)
+	   (list 'Collad c)
+	   (list 'Hall h)
+	   (list 'Barnacle b)
+	   (list 'Parker p)))))
+
+
+;;; Starting a new problem 
+;;; Amb-Eval value:
+;((moore ma) (collad l) (hall g) (barnacle me) (parker r))
+;;; Amb-Eval input:
+;try-again
+;;; Amb-Eval value:
+;((moore g) (collad r) (hall ma) (barnacle me) (parker l))
+;;; Amb-Eval input:
+;try-again
+;;; There are no more values of
+;(yatch-puzzle-2)
+; **** 2 patterns
+
 ;;; START REPL
 (driver-loop)
