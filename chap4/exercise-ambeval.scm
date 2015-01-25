@@ -139,5 +139,23 @@
 	   (list 'miller miller)
 	   (list 'smith smith)))))
 
+;;; Ex 4.40
+(pre-eval
+ (define (multiple-dwelling)
+   (let ((baker (amb 1 2 3 4))
+	 (cooper (amb 2 3 4 5))
+	 (fletcher (amb 2 3 4))
+	 (smith (amb 1 2 3 4 5)))
+     (let ((miller (an-integer-between (+ cooper 1) 5)))
+       (require (not (= (abs (- smith fletcher)) 1)))
+       (require (not (= (abs (- fletcher cooper)) 1)))
+       (require
+	(distinct? (list baker cooper fletcher miller smith)))
+       (list (list 'baker baker)
+	     (list 'cooper cooper)
+	     (list 'fletcher fletcher)
+	     (list 'miller miller)
+	     (list 'smith smith))))))
+
 ;;; START REPL
 (driver-loop)
