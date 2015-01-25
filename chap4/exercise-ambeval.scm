@@ -60,10 +60,10 @@
 
 (pre-eval
  (define (distinct? items)
-   (cond ((null? items) true)
-	 ((null? (cdr items)) true)
-	 ((member (car items) (cdr items)) false)
-	 (else (distinct? (cdr items))))))
+  (cond ((null? items) true)
+	((null? (cdr items)) true)
+	((member (car items) (cdr items)) false)
+	(else (distinct? (cdr items))))))
 
 (pre-eval
  (define (multiple-dwelling)
@@ -157,5 +157,68 @@
 	     (list 'miller miller)
 	     (list 'smith smith))))))
 
+;;; Ex 4.41
+
+(define (distinct? items)
+  (cond ((null? items) true)
+	((null? (cdr items)) true)
+	((member (car items) (cdr items)) false)
+	(else (distinct? (cdr items)))))
+
+(define (between a b)
+  (if (> a b)
+      '()
+      (cons a (between (+ a 1) b))))
+
+(define (flatten x)
+  (reduce append '() x))
+
+(define (flatmap proc xs)
+  (flatten (map proc xs)))
+
+(define (permutation lists)
+  (if (null? lists)
+      '(())
+      (flatmap (lambda (x)
+		 (map (lambda (y)
+			(cons x y))
+		      (permutation (cdr lists))))
+	       (car lists))))
+
+(define (get-baker x) (list-ref x 0))
+(define (get-cooper x) (list-ref x 1))
+(define (get-miller x) (list-ref x 2))
+(define (get-fletcher x) (list-ref x 3))
+(define (get-smith x) (list-ref x 4))
+
+(define (pretty-print set)
+  (map (lambda (s)
+	 (list (list 'baker (get-baker s))
+	       (list 'cooper (get-cooper s))
+	       (list 'fletcher (get-fletcher s))
+	       (list 'miller (get-miller s))
+	       (list 'smith (get-smith s))))
+	 set))
+
+(define (multiple-dwelling)
+  (let ((baker (between 1 4))
+	(cooper (between 2 5))
+	(miller (between 3 5))
+	(fletcher (between 2 4))
+	(smith (between 1 5)))
+    (filter (lambda (ls)
+	      (let ((b (get-baker ls))
+		    (c (get-cooper ls))
+		    (m (get-miller ls))
+		    (f (get-fletcher ls))
+		    (s (get-smith ls)))
+		(and (> m c)
+		     (not (= (abs (- s f)) 1))
+		     (not (= (abs (- f c)) 1))
+		     (distinct? ls))))
+	    (permutation (list baker cooper miller fletcher smith)))))
+
+(pretty-print (multiple-dwelling))
+
 ;;; START REPL
-(driver-loop)
+;(driver-loop)
