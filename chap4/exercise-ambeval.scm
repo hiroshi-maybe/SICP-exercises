@@ -306,8 +306,8 @@
 
 ;;; Ex 4.44
 
-; **** This code is not efficient enough to solve 8-queens in a reasonable time ****
-; Solves 6-queens but cannot more. Need more backtrack optimization
+; Improved efficiency by validating sub block and reuse the result
+; Validation history in 4-queens: (1)(3 1)(4 1)(2 4 1)(2)(4 2)(1 4 2)(3 1 4 2)
 (pre-eval
  (define (replicate make-val num)
    (if (= num 0)
@@ -315,7 +315,7 @@
        (cons (make-val) (replicate make-val (- num 1))))))
 
 (pre-eval
- (define (valid-diagonally? board-state board-size)
+ (define (valid? board-state)
    (define (valid-rest? origin-row offset rows)
      (if (null? rows)
 	 true
@@ -323,36 +323,38 @@
 	       (invalid-neg (- origin-row offset))
 	       (invalid-pos (+ origin-row offset)))
 	   (if (and (not (= invalid-neg tested-row))
-		    (not (= invalid-pos tested-row)))
+		    (not (= invalid-pos tested-row))
+		    (not (= origin-row tested-row)))
 	       (valid-rest? origin-row (+ offset 1) (cdr rows))
 	       false))))
-   (if (null? board-state)
-       true
-       (let ((current-row (car board-state)))
-	 (if (valid-rest? current-row 1 (cdr board-state))
-	     (valid-diagonally? (cdr board-state) board-size)
-	     false)))))
+   (let ((current-row (car board-state)))
+     (valid-rest? current-row 1 (cdr board-state)))))
 
 (pre-eval
  (define (queens board-size)
-   (let ((board-state (replicate (lambda () (an-integer-between 1 board-size)) board-size)))
-     (require (distinct? board-state)) ; validate horizontal position
-     (require (valid-diagonally? board-state board-size))
-     board-state)))
+   (define (iter solution n-left)
+     (if (= n-left 0)
+	 solution
+	 (begin
+	   (let ((solution-ex (cons (an-integer-between 1 board-size) solution)))
+	     (require (valid? solution-ex))
+	     (iter solution-ex (- n-left 1))))))
+   (iter '() board-size)))
 
 ;;; Amb-Eval input:
-;(queens 4)
+;(queens 8)        
 ;;; Starting a new problem 
 ;;; Amb-Eval value:
-;(2 4 1 3)
+;(4 2 7 3 6 8 5 1)
 ;;; Amb-Eval input:
 ;try-again
 ;;; Amb-Eval value:
-;(3 1 4 2)
+;(5 2 4 7 3 8 6 1)
 ;;; Amb-Eval input:
 ;try-again
-;;; There are no more values of
-;(queens 4)
+;;; Amb-Eval value:
+;(3 5 2 8 6 4 7 1)
+;...
 
 ;;; START REPL
 (driver-loop)
