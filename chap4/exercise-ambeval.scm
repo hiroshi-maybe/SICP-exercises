@@ -434,5 +434,71 @@
 ;;; Amb-Eval value:
 ;(a c 3)
 
+;;; Ex 4.52
+(define (if-fail? exp)
+  (tagged-list? exp 'if-fail))
+(define (if-fail-consequent exp)
+  (cadr exp))
+(define (if-fail-alternative exp)
+  (caddr exp))
+
+(define (analyze-if-fail exp)
+  (let ((cproc (analyze (if-fail-consequent exp)))
+	(aproc (analyze (if-fail-alternative exp))))
+    (lambda (env succeed fail)
+      (cproc env
+             (lambda (val fail2)
+	       (succeed val fail2))
+             (lambda ()
+	       (aproc env
+		      (lambda (val fail2)
+			(succeed val fail2))
+		      fail))))))
+
+(define (analyze exp)
+  (cond ((self-evaluating? exp) 
+         (analyze-self-evaluating exp))
+        ((quoted? exp) (analyze-quoted exp))
+        ((variable? exp) (analyze-variable exp))
+        ((assignment? exp) (analyze-assignment exp))
+        ((perm-assignment? exp) (analyze-perm-assignment exp))
+        ((definition? exp) (analyze-definition exp))
+        ((if? exp) (analyze-if exp))
+        ((if-fail? exp) (analyze-if-fail exp))
+        ((lambda? exp) (analyze-lambda exp))
+        ((begin? exp) (analyze-sequence (begin-actions exp)))
+        ((cond? exp) (analyze (cond->if exp)))
+        ((and? exp) (analyze (and->if exp)))
+        ((or? exp) (analyze (or->if exp)))
+        ((let? exp) (analyze (let->combination exp))) ;**
+        ((amb? exp) (analyze-amb exp))                ;**
+        ((application? exp) (analyze-application exp))
+        (else
+         (error "Unknown expression type -- ANALYZE" exp))))
+
+(pre-eval
+ (define (will-fail)
+   (if-fail (let ((x (an-element-of '(1 3 5))))
+	      (require (even? x))
+	      x)
+	    'all-odd)))
+;;; Amb-Eval input:
+;(will-fail)
+;;; Starting a new problem 
+;;; Amb-Eval value:
+; all-odd
+
+(pre-eval
+ (define (wont-fail)
+   (if-fail (let ((x (an-element-of '(1 3 5 8))))
+	      (require (even? x))
+	      x)
+	    'all-odd)))
+;;; Amb-Eval input:
+;(wont-fail)
+;;; Starting a new problem 
+;;; Amb-Eval value:
+; 8
+
 ;;; START REPL
 (driver-loop)

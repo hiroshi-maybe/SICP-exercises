@@ -318,6 +318,7 @@
 ;;      more primitives
         (list '<= <=)
         (list '< <)
+        (list 'even? even?)
         (list 'display display)
         ))
 
