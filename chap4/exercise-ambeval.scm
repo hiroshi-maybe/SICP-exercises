@@ -500,7 +500,7 @@
 ;;; Amb-Eval value:
 ; 8
 
-;;; Ex 3.53
+;;; Ex 4.53
 (pre-eval
  (define (prime-sum-pair list1 list2)
   (let ((a (an-element-of list1))
@@ -517,6 +517,57 @@
 ;;; Starting a new problem 
 ;;; Amb-Eval value:
 ;((8 35) (3 110) (3 20))
+
+;;; Ex 4.54
+
+(define (require? exp) (tagged-list? exp 'require))
+(define (require-predicate exp) (cadr exp))
+
+(define (analyze-require exp)
+  (let ((pproc (analyze (require-predicate exp))))
+    (lambda (env succeed fail)
+      (pproc env
+	     (lambda (pred-value fail2)
+	       (if (not (pred-value))
+		   (fail2)
+		   (succeed 'ok fail2)))
+             fail))))
+
+(define (analyze exp)
+  (cond ((self-evaluating? exp) 
+         (analyze-self-evaluating exp))
+        ((quoted? exp) (analyze-quoted exp))
+        ((variable? exp) (analyze-variable exp))
+        ((assignment? exp) (analyze-assignment exp))
+        ((perm-assignment? exp) (analyze-perm-assignment exp))
+        ((definition? exp) (analyze-definition exp))
+        ((if? exp) (analyze-if exp))
+        ((if-fail? exp) (analyze-if-fail exp))
+        ((lambda? exp) (analyze-lambda exp))
+        ((begin? exp) (analyze-sequence (begin-actions exp)))
+        ((cond? exp) (analyze (cond->if exp)))
+        ((and? exp) (analyze (and->if exp)))
+        ((or? exp) (analyze (or->if exp)))
+        ((let? exp) (analyze (let->combination exp))) ;**
+        ((amb? exp) (analyze-amb exp))                ;**
+        ((require? exp) (analyze-require exp))
+        ((application? exp) (analyze-application exp))
+        (else
+         (error "Unknown expression type -- ANALYZE" exp))))
+
+;;; Amb-Eval input:
+;(an-integer-between 1 2)
+;;; Starting a new problem 
+;;; Amb-Eval value:
+;1
+;;; Amb-Eval input:
+;try-again
+;;; Amb-Eval value:
+;2
+;;; Amb-Eval input:
+;try-again
+;;; There are no more values of
+;(an-integer-between 1 2)
 
 ;;; START REPL
 (driver-loop)
