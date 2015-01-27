@@ -295,6 +295,21 @@
 ;;  support for Prime?); integer? and sqrt for exercise code;
 ;;  eq? for ex. solution
 
+; added for Ex 4.53
+(define divides?
+  (lambda (a b)
+    (= (remainder a b) 0)))
+ 
+(define prime?
+  (lambda (n)
+    (cond ((or (= n 1) (= n 0)) #f)
+      ((= n 2) #t)
+      ((even? n) #f)
+      (else (let prime-test ( (d 3) )
+          (cond ((> (square d) n) #t)
+            ((divides? n d) #f)
+            (else (prime-test (+ d 2)))))))))
+
 (define primitive-procedures
   (list (list 'car car)
         (list 'cdr cdr)
@@ -319,6 +334,7 @@
         (list '<= <=)
         (list '< <)
         (list 'even? even?)
+        (list 'prime? prime?)
         (list 'display display)
         ))
 
