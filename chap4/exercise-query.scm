@@ -1,3 +1,4 @@
+(load "ch4-query.scm")
 
 ;;; Ex 4.55
 
@@ -24,3 +25,6 @@
 ;     (not (job ?supervisor (computer . ?div)))
 ;     (job ?supervisor ?job))
 
+
+
+;(query-driver-loop)
