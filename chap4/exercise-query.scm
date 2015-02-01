@@ -45,10 +45,24 @@
 
 ;;; Ex 4.58
 
-(rule (big-shot ?person)
-      (and (job ?person (?division . ?title-p))
-	   (or (not (supervisor ?person ?boss))
-	       (and (supervisor ?person ?boss)
-		    (not (job ?boss (?division . ?title-b)))))))
+;(rule (big-shot ?person)
+;      (and (job ?person (?division . ?title-p))
+;	   (or (not (supervisor ?person ?boss))
+;	       (and (supervisor ?person ?boss)
+;		    (not (job ?boss (?division . ?title-b)))))))
+
+;;; Ex 4.59
+
+; a
+; (meeting ?division (Friday ?time))
+
+; b
+; (rule (meeting-time ?person ?day-and-time)
+;       (or (meeting whole-company ?day-and-time)
+; 	  (and (job ?person (?div . ?title))
+; 	       (meeting ?div ?day-and-time))))
+
+; c
+; (meeting-time (Hacker Alyssa P) (Wednesday ?time))
 
 ;(query-driver-loop)
