@@ -65,4 +65,8 @@
 ; c
 ; (meeting-time (Hacker Alyssa P) (Wednesday ?time))
 
+;;; Ex 4.60
+
+; Need to sort by name to get unique pairs
+
 ;(query-driver-loop)
