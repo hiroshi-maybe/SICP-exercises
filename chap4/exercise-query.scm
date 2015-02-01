@@ -43,4 +43,12 @@
 ;     (salary ?person2 ?amount2)
 ;     (lisp-value > ?amount1 ?amount2)))
 
+;;; Ex 4.58
+
+(rule (big-shot ?person)
+      (and (job ?person (?division . ?title-p))
+	   (or (not (supervisor ?person ?boss))
+	       (and (supervisor ?person ?boss)
+		    (not (job ?boss (?division . ?title-b)))))))
+
 ;(query-driver-loop)
