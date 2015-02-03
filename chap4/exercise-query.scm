@@ -84,4 +84,13 @@
 
 ; No rule which reduces (last-pair ?x (3))
 
+;;; Ex 4.63
+
+;(rule (grand-son ?s ?g)
+;      (and (son ?s ?f)
+;	   (son ?f ?g)))
+;(rule (son ?s ?m)
+;      (and (wife ?w ?m)
+;	   (son ?s ?w)))
+
 ;(query-driver-loop)
