@@ -77,5 +77,11 @@
 ;(2 next-to 1 in (2 1 3 1))
 ;(3 next-to 1 in (2 1 3 1))
 
+;;; Ex 4.62
+;(rule (last-pair (?x) (?x))
+;(rule (last-pair (?u . ?v) (?x))
+;      (last-pair ?v (?x)))
+
+; No rule which reduces (last-pair ?x (3))
 
 ;(query-driver-loop)
