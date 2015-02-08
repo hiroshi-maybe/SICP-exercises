@@ -93,4 +93,11 @@
 ;      (and (wife ?w ?m)
 ;	   (son ?s ?w)))
 
-;(query-driver-loop)
+;;; Ex 4.68
+;(rule (reverse () ()))
+;(rule (reverse (?u . ?v) ?y)
+;      (and (reverse ?v ?v-rev)
+;	   (append-to-form ?v-rev (?u) ?7)))
+
+(initialize-data-base microshaft-data-base)	   
+(query-driver-loop)
