@@ -12,7 +12,6 @@
 ;;;;NB. PUT's are commented out and no top-level table is set up.
 ;;;;Instead use initialize-data-base (from manual), supplied in this file.
 
-
 ;;;SECTION 4.4.4.1
 ;;;The Driver Loop and Instantiation
 
@@ -634,6 +633,21 @@
 
 (can-do-job (administration secretary)
             (administration big wheel))
+
+(meeting accounting (Monday 9am))
+(meeting administration (Monday 10am))
+(meeting computer (Wednesday 3pm))
+(meeting administration (Friday 1pm))
+
+(son Adam Cain)
+(son Cain Enoch)
+(son Enoch Irad)
+(son Irad Mehujael)
+(son Mehujael Methushael)
+(son Methushael Lamech)
+(wife Lamech Ada)
+(son Ada Jabal)
+(son Ada Jubal)
 
 (rule (lives-near ?person-1 ?person-2)
       (and (address ?person-1 (?town . ?rest-1))
