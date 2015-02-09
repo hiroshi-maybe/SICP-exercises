@@ -27,11 +27,6 @@
     ((_ exp)
      (run (quote exp)))))
 
-(define-syntax run-query-series
-  (syntax-rules ()
-    ((_ exps)
-     (for-each (lambda (exp) (run (quote exp))) exps))))
-
 (initialize-data-base microshaft-data-base)
 
 ;;; Ex 4.55
@@ -142,7 +137,7 @@
 
 (run-query
  (assert!
-  (rule (grand-son ?s ?g)
+  (rule (grandson ?s ?g)
 	(and (son ?s ?f)
 	     (son ?f ?g)))))
 (run-query
@@ -162,13 +157,30 @@
       (append-to-form ?v ?y ?z))))
 
 (run-query
-  (assert!
-   (rule (reverse () ()))))
+ (assert!
+  (rule (reverse () ()))))
 (run-query
-  (assert!
-   (rule (reverse (?u . ?v) ?y)
-	 (and (reverse ?v ?v-rev)
-	      (append-to-form ?v-rev (?u) ?y)))))
+ (assert!
+  (rule (reverse (?u . ?v) ?y)
+	(and (reverse ?v ?v-rev)
+	     (append-to-form ?v-rev (?u) ?y)))))
 
 (run-query
  (reverse (1 2 3) ?x))
+
+;;; Ex 4.69
+(run-query
+  (assert!
+   (rule ((grandson) ?x ?y)
+	 (grandson ?x ?y))))
+(run-query
+  (assert!
+   (rule ((great . ?rel) ?x ?y)
+	 (and (son ?x ?gx)
+	      (?rel ?gx ?y)))))
+
+(run-query
+ ((great grandson) Adam ?x))
+(run-query
+ ((great great great great great grandson) Adam ?x))
+
