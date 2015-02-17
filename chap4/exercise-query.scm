@@ -184,3 +184,10 @@
 (run-query
  ((great great great great great grandson) Adam ?x))
 
+;;; Ex 4.74
+
+;(define (simple-stream-flatmap proc s)
+;  (simple-flatten (stream-map proc s)))
+(define (simple-flatten stream)
+  (stream-map (lambda (x) (stream-car x))
+	      (stream-filter (lambda (x) (not (stream-null? x))) stream)))
