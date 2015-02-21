@@ -191,3 +191,31 @@
 (define (simple-flatten stream)
   (stream-map (lambda (x) (stream-car x))
 	      (stream-filter (lambda (x) (not (stream-null? x))) stream)))
+
+;;; Ex 4.75
+
+(define (unique-query exps) (car exps))
+
+(define (single-item-stream? x)
+  (and (not (stream-null? x))
+       (stream-null? (stream-cdr x))))
+
+(define (uniquely-asserted operands frame-stream)
+  (stream-flatmap
+   (lambda (frame)
+     (let ((s (qeval (unique-query operands)
+		     (singleton-stream frame))))
+       (if (single-item-stream? s)
+	   s
+	   the-empty-stream)))
+   frame-stream))
+
+(put 'unique 'qeval uniquely-asserted)
+
+(run-query
+ (unique (job ?x (computer wizard))))
+; (unique (job (bitdiddle ben) (computer wizard)))
+(run-query
+ (and (supervisor ?person ?boss) (unique (supervisor ?other ?boss))))
+; (and (supervisor (cratchet robert) (scrooge eben)) (unique (supervisor (cratchet robert) (scrooge eben))))
+; (and (supervisor (reasoner louis) (hacker alyssa p)) (unique (supervisor (reasoner louis) (hacker alyssa p))))
