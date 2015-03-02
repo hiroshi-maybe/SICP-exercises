@@ -27,6 +27,7 @@
 (set-register-contents! fact-machine 'n 5)
 (start fact-machine)
 (get-register-contents fact-machine 'a)
+; 120
 
 ;;; Ex 5.3
 
@@ -71,6 +72,7 @@
 (set-register-contents! sqrt-machine 'x 2)
 (start sqrt-machine)
 (get-register-contents sqrt-machine 'g)
+; 1.4142156862745097
 
 ;;; Ex 5.4 (and 5.7)
 
@@ -100,6 +102,7 @@
 (set-register-contents! exp-rec-machine 'n 3)
 (start exp-rec-machine)
 (get-register-contents exp-rec-machine 'val)
+; 8
 
 ; b
 
@@ -120,4 +123,5 @@
 (set-register-contents! exp-iter-machine 'n 3)
 (start exp-iter-machine)
 (get-register-contents exp-iter-machine 'val)
+; 8
 
