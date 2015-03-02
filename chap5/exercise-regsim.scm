@@ -72,3 +72,52 @@
 (start sqrt-machine)
 (get-register-contents sqrt-machine 'g)
 
+;;; Ex 5.4
+
+; a
+(define exp-rec-machine
+  (make-machine
+   '(b n val continue)
+   (list (list '* *) (list '= =) (list '- -))
+   '((assign continue (label exp-done))
+     push-loop
+     (test (op =) (reg n) (const 0))
+     (branch (label base-case))
+     (save continue)
+     (assign continue (label pop-loop))
+     (assign n (op -) (reg n) (const 1))
+     (goto (label push-loop))
+     pop-loop
+     (assign val (op *) (reg b) (reg val))
+     (restore continue)
+     (goto (reg continue))
+     base-case
+     (assign val (const 1))
+     (goto (reg continue))
+     exp-done)))
+
+(set-register-contents! exp-rec-machine 'b 2)
+(set-register-contents! exp-rec-machine 'n 3)
+(start exp-rec-machine)
+(get-register-contents exp-rec-machine 'val)
+
+; b
+
+(define exp-iter-machine
+  (make-machine
+   '(b n val)
+   (list (list '* *) (list '= =) (list '- -))
+   '((assign val (const 1))
+     iter-loop
+     (test (op =) (reg n) (const 0))
+     (branch (label exp-done))
+     (assign n (op -) (reg n) (const 1))
+     (assign val (op *) (reg b) (reg val))
+     (goto (label iter-loop))
+     exp-done)))
+
+(set-register-contents! exp-iter-machine 'b 2)
+(set-register-contents! exp-iter-machine 'n 3)
+(start exp-iter-machine)
+(get-register-contents exp-iter-machine 'val)
+
