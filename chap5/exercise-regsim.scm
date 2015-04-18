@@ -72,7 +72,7 @@
 (start sqrt-machine)
 (get-register-contents sqrt-machine 'g)
 
-;;; Ex 5.4
+;;; Ex 5.4 (and 5.7)
 
 ; a
 (define exp-rec-machine
