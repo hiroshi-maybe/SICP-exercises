@@ -125,3 +125,42 @@
 (get-register-contents exp-iter-machine 'val)
 ; 8
 
+;;; Ex 5.8
+
+(define (extract-labels text receive)
+  (if (null? text)
+      (receive '() '())
+      (extract-labels (cdr text)
+		      (lambda (insts labels)
+			(let ((next-inst (car text)))
+			  (if (symbol? next-inst)
+			      (let ((val (assoc next-inst labels)))
+				(if val
+				    (error "Duplicated label -- ASSEMBLE" next-inst)
+				    (receive insts
+					     (cons (make-label-entry next-inst
+								     insts)
+						   labels))))
+			      (receive (cons (make-instruction next-inst)
+					     insts)
+				       labels)))))))
+
+(define dup-label-machine
+  (make-machine
+   '(a)
+   (list)
+   '(start
+     (goto (label here))
+     here
+     (assign a (const 3))
+     (goto (label there))
+     here
+     (assign a (const 4))
+     (goto (label there))
+     there)))
+
+; (start dup-label-machine)
+; (get-register-contents dup-label-machine 'a)
+; 3 before modifying `extract-labels`
+
+
