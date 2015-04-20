@@ -176,19 +176,76 @@
     (lambda ()
             (apply op (map (lambda (p) (p)) aprocs)))))
 
-; Code to test
+; Code to test. Comment out to suppress error to run following exercises
+;(define illegal-label-machine
+;  (make-machine
+;   '(a b t)
+;   (list (list 'rem remainder) (list '= =))
+;   '(test-b
+;;;;;;;; label in operation
+;     (test (op =) (reg b) (const 0) (label gcd-done))
+;     (branch (label gcd-done))
+;     (assign t (op rem) (reg a) (reg b))
+;     (assign a (reg b))
+;     (assign b (reg t))
+;     (goto (label test-b))
+;     gcd-done)))
 
-(define illegal-label-machine
+;;; Ex 5.10
+
+; New syntax `add <register A> <register B>`
+; value of register A := value of register A + value of register B
+
+(define (make-execution-procedure inst labels machine
+				  pc flag stack ops)
+  (cond ((eq? (car inst) 'assign)
+	 (make-assign inst machine labels ops pc))
+	((eq? (car inst) 'test)
+	 (make-test inst machine labels ops flag pc))
+	((eq? (car inst) 'branch)
+	 (make-branch inst machine labels flag pc))
+	((eq? (car inst) 'goto)
+	 (make-goto inst machine labels pc))
+	((eq? (car inst) 'save)
+	 (make-save inst machine stack pc))
+	((eq? (car inst) 'restore)
+	 (make-restore inst machine stack pc))
+	; New syntax `add`
+	((eq? (car inst) 'add)
+	 (make-add inst machine pc))
+	((eq? (car inst) 'perform)
+	 (make-perform inst machine labels ops pc))
+	(else (error "Unknown instruction type -- ASSEMBLE"
+		                          inst))))
+
+(define (make-add inst machine pc)
+  (let ((op1 (get-register machine (op1-reg-name inst)))
+	(op2 (get-register machine (op2-reg-name inst))))
+    (lambda ()
+      (set-contents! op1 (+ (get-contents op1)
+			    (get-contents op2)))
+      (advance-pc pc))))
+
+(define (op1-reg-name inst) (cadr (cadr inst)))
+(define (op2-reg-name inst) (cadr (caddr inst)))
+
+; machine to verify new syntax
+(define over-ten-machine
   (make-machine
-   '(a b t)
-   (list (list 'rem remainder) (list '= =))
-   '(test-b
-; label in operation
-     (test (op =) (reg b) (const 0) (label gcd-done))
-     (branch (label gcd-done))
-     (assign t (op rem) (reg a) (reg b))
-     (assign a (reg b))
-     (assign b (reg t))
-     (goto (label test-b))
-     gcd-done)))
+   '(a b)
+   (list (list '> >))
+   '(test
+     (test (op >) (reg a) (const 10))
+     (branch (label over-ten-done))
+     (add (reg a) (reg b))
+     (goto (label test))
+     over-ten-done)))
+
+(set-register-contents! over-ten-machine 'a 1)
+(set-register-contents! over-ten-machine 'b 3)
+(start over-ten-machine)
+(get-register-contents over-ten-machine 'a)
+; 13
+
+
 
