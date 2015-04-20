@@ -145,22 +145,50 @@
 					     insts)
 				       labels)))))))
 
-(define dup-label-machine
-  (make-machine
-   '(a)
-   (list)
-   '(start
-     (goto (label here))
-     here
-     (assign a (const 3))
-     (goto (label there))
-     here
-     (assign a (const 4))
-     (goto (label there))
-     there)))
+;(define dup-label-machine
+;  (make-machine
+;   '(a)
+;   (list)
+;   '(start
+;     (goto (label here))
+;     here
+;     (assign a (const 3))
+;     (goto (label there))
+;     here
+;     (assign a (const 4))
+;     (goto (label there))
+;     there)))
 
 ; (start dup-label-machine)
 ; (get-register-contents dup-label-machine 'a)
 ; 3 before modifying `extract-labels`
 
+;;; Ex 5.9
+
+(define (make-operation-exp exp machine labels operations)
+  (let ((op (lookup-prim (operation-exp-op exp) operations))
+	(aprocs
+	 (map (lambda (e)
+		(if (label-exp? e)
+		    (error "Label cannot be put in operation operands -- MAKE-OPERATION-EXP" e)
+		    (make-primitive-exp e machine labels)))
+	      (operation-exp-operands exp))))
+    (lambda ()
+            (apply op (map (lambda (p) (p)) aprocs)))))
+
+; Code to test
+
+(define illegal-label-machine
+  (make-machine
+   '(a b t)
+   (list (list 'rem remainder) (list '= =))
+   '(test-b
+; label in operation
+     (test (op =) (reg b) (const 0) (label gcd-done))
+     (branch (label gcd-done))
+     (assign t (op rem) (reg a) (reg b))
+     (assign a (reg b))
+     (assign b (reg t))
+     (goto (label test-b))
+     gcd-done)))
 
