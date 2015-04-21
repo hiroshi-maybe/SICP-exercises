@@ -326,7 +326,7 @@
 ; 11
 |#
 
-;;; Ex 5.15, Ex 5.16
+;;; Ex 5.15, Ex 5.16, Ex 5.18
 
 (define (make-new-machine)
   (let ((pc (make-register 'pc))
