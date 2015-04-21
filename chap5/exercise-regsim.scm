@@ -326,14 +326,15 @@
 ; 11
 |#
 
-;;; Ex 5.15
+;;; Ex 5.15, Ex 5.16
 
 (define (make-new-machine)
   (let ((pc (make-register 'pc))
 	(flag (make-register 'flag))
 	(stack (make-stack))
 	(the-instruction-sequence '())
-	(instruction-counter 0)) ; @CHANGE
+	(instruction-counter 0) ; 5.15
+	(trace false))
     (let ((the-ops
 	   (list (list 'initialize-stack
 		       (lambda () (stack 'initialize)))))
@@ -356,13 +357,18 @@
 	  (if (null? insts)
 	      'done
 	      (begin
+		(if trace
+		    (print-trace (car insts)))
 		((instruction-execution-proc (car insts)))
-		(set! instruction-counter (+ instruction-counter 1)) ; @CHANGE
+		(set! instruction-counter (+ instruction-counter 1)) ; 5.15
 		(execute)))))
       (define (print-instruction-counter)
 	(newline)
 	(display (list 'instruction-counter  '= instruction-counter))
 	'print-done)
+      (define (print-trace inst)
+	(newline)
+	(display (car inst)))
       (define (dispatch message)
 	(cond ((eq? message 'start)
 	       (set-contents! pc the-instruction-sequence)
@@ -375,9 +381,21 @@
 	       (lambda (ops) (set! the-ops (append the-ops ops))))
 	      ((eq? message 'stack) stack)
 	      ((eq? message 'operations) the-ops)
-	      ((eq? message 'instruction-counter) (print-instruction-counter)) ; @CHANGE
+	      ((eq? message 'instruction-counter) (print-instruction-counter)) ; 5.15
+	      ((eq? message 'trace-on)  (set! trace true)) ; 5.16
+	      ((eq? message 'trace-off) (set! trace false)) ; 5.16
 	      (else (error "Unknown request -- MACHINE" message))))
       dispatch)))
+
+; 5.15
+(define (print-instruction-counter machine)
+  (machine 'instruction-counter))
+
+; 5.16
+(define (enable-trace machine)
+  (machine 'trace-on))
+(define (disable-trace machine)
+  (machine 'trace-off))
 
 ; test code
 (define gcd-machine
@@ -395,8 +413,41 @@
 
 (set-register-contents! gcd-machine 'a 206)
 (set-register-contents! gcd-machine 'b 40)
+(enable-trace gcd-machine) ; 5.16
+
 (start gcd-machine)
+
+; 5.16
+(test (op =) (reg b) (const 0))
+(branch (label gcd-done))
+(assign t (op rem) (reg a) (reg b))
+(assign a (reg b))
+(assign b (reg t))
+(goto (label test-b))
+(test (op =) (reg b) (const 0))
+(branch (label gcd-done))
+(assign t (op rem) (reg a) (reg b))
+(assign a (reg b))
+(assign b (reg t))
+(goto (label test-b))
+(test (op =) (reg b) (const 0))
+(branch (label gcd-done))
+(assign t (op rem) (reg a) (reg b))
+(assign a (reg b))
+(assign b (reg t))
+(goto (label test-b))
+(test (op =) (reg b) (const 0))
+(branch (label gcd-done))
+(assign t (op rem) (reg a) (reg b))
+(assign a (reg b))
+(assign b (reg t))
+(goto (label test-b))
+(test (op =) (reg b) (const 0))
+(branch (label gcd-done))
+
 (get-register-contents gcd-machine 'a)
-(gcd-machine 'instruction-counter)
+(print-instruction-counter gcd-machine) ; 5.15
 ; (instruction-counter = 26)
+
+
 
