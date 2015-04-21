@@ -387,6 +387,37 @@
 	      (else (error "Unknown request -- MACHINE" message))))
       dispatch)))
 
+; 5.18
+(define (enable-trace-register machine register-name)
+  ((get-register machine register-name) 'trace-on))
+(define (disable-trace-register machine register-name)
+  ((get-register machine register-name) 'trace-off))
+
+(define (make-register name)
+
+  ; 5.18
+  (define (print-trace old new)
+    (newline)
+    (display (list 'name  '= name
+		   old '=> new)))
+
+  (let ((contents '*unassigned*)
+	(trace false)) ; 5.18
+    (define (dispatch message)
+      (cond ((eq? message 'get) contents)
+	    ((eq? message 'set)
+	     (lambda (value)
+	       (if trace
+		   (print-trace contents value))
+	       (set! contents value)))
+	    ((eq? message 'trace-on) ; 5.18
+	     (set! trace true))
+	    ((eq? message 'trace-off) ; 5.18
+	     (set! trace false))
+	    (else
+	     (error "Unknown request -- REGISTER" message))))
+    dispatch))
+
 ; 5.15
 (define (print-instruction-counter machine)
   (machine 'instruction-counter))
@@ -411,6 +442,9 @@
      (goto (label test-b))
      gcd-done)))
 
+; 5.18
+(enable-trace-register gcd-machine 'a)
+
 (set-register-contents! gcd-machine 'a 206)
 (set-register-contents! gcd-machine 'b 40)
 (enable-trace gcd-machine) ; 5.16
@@ -418,28 +452,33 @@
 (start gcd-machine)
 
 ; 5.16
+;(name = a *unassigned* => 206) ;5.18
 ;(test (op =) (reg b) (const 0))
 ;(branch (label gcd-done))
 ;(assign t (op rem) (reg a) (reg b))
 ;(assign a (reg b))
+;(name = a 206 => 40) ;5.18
 ;(assign b (reg t))
 ;(goto (label test-b))
 ;(test (op =) (reg b) (const 0))
 ;(branch (label gcd-done))
 ;(assign t (op rem) (reg a) (reg b))
 ;(assign a (reg b))
+;(name = a 40 => 6) ;5.18
 ;(assign b (reg t))
 ;(goto (label test-b))
 ;(test (op =) (reg b) (const 0))
 ;(branch (label gcd-done))
 ;(assign t (op rem) (reg a) (reg b))
 ;(assign a (reg b))
+;(name = a 6 => 4) ;5.18
 ;(assign b (reg t))
 ;(goto (label test-b))
 ;(test (op =) (reg b) (const 0))
 ;(branch (label gcd-done))
 ;(assign t (op rem) (reg a) (reg b))
 ;(assign a (reg b))
+;(name = a 4 => 2) ;5.18
 ;(assign b (reg t))
 ;(goto (label test-b))
 ;(test (op =) (reg b) (const 0))
