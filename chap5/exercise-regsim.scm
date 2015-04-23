@@ -600,7 +600,30 @@
 (get-register-contents append-machine 'y)
 ; (a b (c) d (e))
 
+; append!
 
-
-
+(define append!-machine
+  (make-machine
+   '(x-cdr _ x-var x y continue)
+   (list (list 'set-cdr! set-cdr!) (list 'cdr cdr) (list 'null? null?))
+   '(
+     (assign x-var (reg x))
+     last-pair
+     (assign x-cdr (op cdr) (reg x-var))
+     (test (op null?) (reg x-cdr))
+     (branch (label empty))
+     (assign x-var (reg x-cdr))
+     (goto (label last-pair))
+     empty
+     (goto (label do-set-cdr))
+     do-set-cdr
+     (assign _ (op set-cdr!) (reg x-var) (reg y))
+     (goto (label done))
+     done)))
      
+(set-register-contents! append!-machine 'x '((a) b c))
+(set-register-contents! append!-machine 'y '((d) e))
+(start append!-machine)
+(get-register-contents append!-machine 'x)
+; ((a) b c (d) e)
+
