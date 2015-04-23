@@ -533,3 +533,37 @@
 (get-register-contents count-leaves-machine 'counter)
 ; 7
 
+; b
+(define count-leaves-iter-machine
+  (make-machine
+   '(tree continue n temp-counter)
+   (list (list 'car car) (list 'cdr cdr) (list 'null? null?) (list '+ +) (list 'pair? pair?))
+   '(
+     (assign continue (label done))
+     (assign n (const 0))
+     iter
+     (test (op null?) (reg tree))
+     (branch (label null-tree))
+     (test (op pair?) (reg tree))
+     (branch (label iter-left))
+     (assign n (op +) (reg n) (const 1))
+     (goto (reg continue))
+     null-tree
+     (goto (reg continue))
+     iter-left
+     (save continue)
+     (save tree)
+     (assign continue (label iter-right))
+     (assign tree (op car) (reg tree))
+     (goto (label iter))
+     iter-right
+     (restore tree)
+     (restore continue)
+     (assign tree (op cdr) (reg tree))
+     (goto (label iter))
+     done)))
+
+(set-register-contents! count-leaves-iter-machine 'tree '(a (b c (d (h (i)))) (e f) g))
+(start count-leaves-iter-machine)
+(get-register-contents count-leaves-iter-machine 'n)
+
