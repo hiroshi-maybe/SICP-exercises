@@ -488,5 +488,48 @@
 (print-instruction-counter gcd-machine) ; 5.15
 ; (instruction-counter = 26)
 
+;;; Ex 5.21
 
+; a
+(define count-leaves-machine
+  (make-machine
+   '(tree continue counter temp-counter)
+   (list (list 'car car) (list 'cdr cdr) (list 'null? null?) (list '+ +) (list 'pair? pair?))
+   '(
+     (assign continue (label done))
+     (assign counter (const 0))
+     walk
+     (test (op null?) (reg tree))
+     (branch (label null-tree))
+     (test (op pair?) (reg tree))
+     (branch (label left-tree))
+     (assign counter (const 1))
+     (goto (reg continue))
+     null-tree
+     (assign counter (const 0))
+     (goto (reg continue))
+     left-tree
+     (save continue)
+     (save tree)
+     (assign continue (label right-tree))
+     (assign tree (op car) (reg tree))
+     (goto (label walk))
+     right-tree
+     (restore tree)
+     (save counter)
+     (assign continue (label climb-tree))
+     (assign tree (op cdr) (reg tree))
+     (goto (label walk))
+     climb-tree
+     (assign temp-counter (reg counter))
+     (restore counter)
+     (restore continue)
+     (assign counter (op +) (reg counter) (reg temp-counter))
+     (goto (reg continue))
+     done)))
+
+(set-register-contents! count-leaves-machine 'tree '(a (b c (d)) (e f) g))
+(start count-leaves-machine)
+(get-register-contents count-leaves-machine 'counter)
+; 7
 
