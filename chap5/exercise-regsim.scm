@@ -567,3 +567,40 @@
 (start count-leaves-iter-machine)
 (get-register-contents count-leaves-iter-machine 'n)
 
+;;; Ex 5.22
+
+; append
+(define append-machine
+  (make-machine
+   '(x-temp x y continue)
+   (list (list 'car car) (list 'cdr cdr) (list 'null? null?) (list 'cons cons))
+   '(
+     (assign continue (label done))
+     append
+     (test (op null?) (reg x))
+     (branch (label empty))
+     (assign x-temp (op car) (reg x))
+     (save x-temp)
+     (save continue)
+     (assign x (op cdr) (reg x))
+     (assign continue (label cons))
+     (goto (label append))
+     cons
+     (restore continue)
+     (restore x-temp)
+     (assign y (op cons) (reg x-temp) (reg y))
+     (goto (reg continue))
+     empty
+     (goto (reg continue))
+     done)))
+
+(set-register-contents! append-machine 'x '(a b (c)))
+(set-register-contents! append-machine 'y '(d (e)))
+(start append-machine)
+(get-register-contents append-machine 'y)
+; (a b (c) d (e))
+
+
+
+
+     
