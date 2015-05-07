@@ -263,6 +263,8 @@ ev-if-alternative
 ev-if-consequent
   (assign exp (op if-consequent) (reg exp))
   (goto (label eval-dispatch))
+
+; for Ex 5.23
 ev-cond
   (assign exp (op cond->if) (reg exp)) 
   (goto (label ev-if))

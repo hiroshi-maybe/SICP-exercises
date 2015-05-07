@@ -3,7 +3,10 @@
 ;;; Ex 5.23
 #|
 ;;; EC-Eval input:
-(define (cond-test x)                                                                                                                                                           (cond ((< x 10) 1)                                                                                                                                                                  ((= x 10) 2)                                                                                                                                                                  (else 3)))
+(define (cond-test x)
+  (cond ((< x 10) 1)
+	((= x 10) 2)
+	(else 3)))
 
 (total-pushes = 3 maximum-depth = 3)
 ;;; EC-Eval value:
