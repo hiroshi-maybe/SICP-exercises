@@ -56,6 +56,7 @@
    (list 'no-operands? no-operands?)
    (list 'first-operand first-operand)
    (list 'rest-operands rest-operands)
+   (list 'cond? cond?) ; for Ex 5.23
 
    ;;operations in eceval-support.scm
    (list 'true? true?)
@@ -76,8 +77,9 @@
    (list 'empty-arglist empty-arglist)
    (list 'adjoin-arg adjoin-arg)
    (list 'last-operand? last-operand?)
-   (list 'no-more-exps? no-more-exps?)	;for non-tail-recursive machine
-   (list 'get-global-environment get-global-environment))
+   (list 'no-more-exps? no-more-exps?)  ;for non-tail-recursive machine
+   (list 'get-global-environment get-global-environment)
+   (list 'cond->if cond->if)) ; for Ex 5.23
    )
 
 (define eceval
@@ -129,6 +131,8 @@ eval-dispatch
   (branch (label ev-definition))
   (test (op if?) (reg exp))
   (branch (label ev-if))
+  (test (op cond?) (reg exp)) ; for Ex 5.23 
+  (branch (label ev-cond))
   (test (op lambda?) (reg exp))
   (branch (label ev-lambda))
   (test (op begin?) (reg exp))
@@ -259,6 +263,9 @@ ev-if-alternative
 ev-if-consequent
   (assign exp (op if-consequent) (reg exp))
   (goto (label eval-dispatch))
+ev-cond
+  (assign exp (op cond->if) (reg exp)) 
+  (goto (label ev-if))
 
 ev-assignment
   (assign unev (op assignment-variable) (reg exp))
