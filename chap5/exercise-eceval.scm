@@ -34,10 +34,12 @@ ok
 3
 |#
 
-;;; Ex 5.26
+;;; Ex 5.26, 5.27
 
-;;;;;;;; naiive recursive call
 #|
+
+;;;;;;;; naiive recursive call ;;;;;;;;
+
 (define (factorial n)
   (if (= n 1)
       1
@@ -46,19 +48,20 @@ ok
 ;;; EC-Eval input:
 (factorial 5)
 (total-pushes = 144 maximum-depth = 28)
-1: 16
-2: 48
-3: 80
-4: 112
-5: 144
+
+#: total-pushes | maximum-depth
+--------------------------------
+1: 16  | 8
+2: 48  | 13
+3: 80  | 18
+4: 112 | 23
+5: 144 | 28
 
 ; b
 <total-pushes> = 32 * <n> - 16
 
-|#
+;;;;;;;; tail recursive ;;;;;;;;
 
-;;;;;;;; tail recursive
-#|
 (define (factorial-t n)
   (define (iter product counter)
     (if (> counter n)
@@ -70,14 +73,24 @@ ok
 ;;; EC-Eval input:
 (factorial-t 5)
 (total-pushes = 204 maximum-depth = 10)
-1: 64
-2: 99
-3: 134
-4: 169
-5: 204
+
+#: total-pushes | maximum-depth
+--------------------------------
+1: 64  | 10
+2: 99  | 10
+3: 134 | 10
+4: 169 | 10
+5: 204 | 10
 
 ; b
 <total-pushes> = 35 * <n> + 29
+
+;;;;;;; summary ;;;;;;;;
+
+#        : total-pushes  | maximum-depth
+----------------------------------------
+rec      : 32 * <n> - 16 | 5 * <n> + 3
+tail rec : 35 * <n> + 29 | 10 (constant)
 
 |#
 
