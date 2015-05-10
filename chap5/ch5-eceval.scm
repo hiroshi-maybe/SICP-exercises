@@ -79,7 +79,8 @@
    (list 'last-operand? last-operand?)
    (list 'no-more-exps? no-more-exps?)  ;for non-tail-recursive machine
    (list 'get-global-environment get-global-environment)
-   (list 'cond->if cond->if)) ; for Ex 5.23
+   (list 'cond->if cond->if) ; for Ex 5.23
+   (list 'symbol? symbol?)) ; for Ex 5.33
    )
 
 (define eceval
@@ -159,15 +160,21 @@ ev-lambda
 
 ev-application
   (save continue)
-  (save env)
   (assign unev (op operands) (reg exp))
-  (save unev)
   (assign exp (op operator) (reg exp))
+  (test (op symbol?) (reg exp))               ;; fast path to apply normal function application (Ex 5.33)
+  (branch (label ev-appl-operator-symbol))    ;; skip unnecessary stack operations `(save env)` `(save unev)`
+  (save env)
+  (save unev)
   (assign continue (label ev-appl-did-operator))
+  (goto (label eval-dispatch))
+ev-appl-operator-symbol                       ;; for Ex 5.33
+  (assign continue (label ev-appl-did-operator-no-restore))
   (goto (label eval-dispatch))
 ev-appl-did-operator
   (restore unev)
   (restore env)
+ev-appl-did-operator-no-restore               ;; skip restore if coming through `ev-appl-operator-symbol` label
   (assign argl (op empty-arglist))
   (assign proc (reg val))
   (test (op no-operands?) (reg unev))

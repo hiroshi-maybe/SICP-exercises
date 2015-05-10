@@ -94,6 +94,23 @@ tail rec : 35 * <n> + 29 | 10 (constant)
 
 |#
 
+;;; Ex 5.33
+
+#|
+;;; EC-Eval input:
+(define (add a b) (+ a b))
+
+;;; EC-Eval input:
+(add 1 2)
+
+;;;;;;; before change ;;;;;;;;
+(total-pushes = 16 maximum-depth = 5)
+
+;;;;;;;  after change ;;;;;;;;
+(total-pushes = 12 maximum-depth = 5)
+
+|#
+
 ; start repl
 (define the-global-environment (setup-environment))
 (start eceval)
