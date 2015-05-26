@@ -258,16 +258,19 @@
 
 ;;; Ex 5.35
 
+#|
 (compile
  '(define (f x)
     (+ x (g (+ x 2))))
  'val
  'next)
+|#
 
 ;;; Ex 5.36
 
 ; Operands are evaluated right-to-left
 
+#|
 (define (construct-arglist operand-codes)
   (let ((operand-codes operand-codes)) ; remove (reverse *)
     (if (null? operand-codes)
@@ -301,6 +304,126 @@
 	 '(env)
 	 code-for-next-arg
 	 (code-to-get-rest-args (cdr operand-codes))))))
+|#
 
 ; less efficient because `append` in `adjoin-arg` needs to go through a list (O(1) to O(n))
+
+;;; Ex 5.37
+
+#|
+(define (preserving regs seq1 seq2)
+  (if (null? regs)
+      (append-instruction-sequences seq1 seq2)
+      (let ((first-reg (car regs)))
+;;; Ignore required or modified registers ;;;
+;	(if (and (needs-register? seq2 first-reg)
+;		                  (modifies-register? seq1 first-reg))
+	(preserving (cdr regs)
+		    (make-instruction-sequence
+		     (list-union (list first-reg) (registers-needed seq1))
+		     (list-difference
+		      (registers-modified seq1)
+		                   (list first-reg)) 
+		     (append `((save ,first-reg))
+			     (statements seq1)
+			     `((restore ,first-reg))))
+		    seq2)
+;	(preserving (cdr regs) seq1 seq2)
+	)))
+|#
+
+(compile
+ '(define (f x)
+    (+ x 1))
+ 'val
+ 'next)
+
+#|
+
+; Bunch of redundant stack uses
+
+((env) (val)
+ (
+
+; Redundant stack use
+;  (save continue)
+;  (save env)
+;  (save continue)
+
+  (assign val (op make-compiled-procedure) (label entry2) (reg env))
+  (goto (label after-lambda1))
+  entry2
+  (assign env (op compiled-procedure-env) (reg proc))
+  (assign env (op extend-environment) (const (x)) (reg argl) (reg env))
+
+; Redundant stack use
+;  (save continue)
+;  (save env)
+;  (save continue)
+  
+  (assign proc (op lookup-variable-value) (const +) (reg env))
+
+; Redundant stack use
+;  (restore continue)
+;  (restore env)
+;  (restore continue)
+;  (save continue)
+;  (save proc)
+;  (save env)
+;  (save continue)
+  
+  (assign val (const 1))
+
+; Redundant stack use
+;  (restore continue)
+
+  (assign argl (op list) (reg val))
+
+; Redundant stack use
+;  (restore env)
+;  (save argl)
+;  (save continue)
+  
+  (assign val (op lookup-variable-value) (const x) (reg env))
+
+; Redundant stack use
+;  (restore continue)
+;  (restore argl)
+  
+  (assign argl (op cons) (reg val) (reg argl))
+
+; Redundant stack use
+;  (restore proc)
+;  (restore continue) 
+
+  (test (op primitive-procedure?) (reg proc))
+  (branch (label primitive-branch5))
+  compiled-branch4
+  (assign val (op compiled-procedure-entry) (reg proc))
+  (goto (reg val))
+  primitive-branch5
+
+; Redundant stack use
+;  (save continue)
+  
+  (assign val (op apply-primitive-procedure) (reg proc) (reg argl))
+
+; Redundant stack use
+;  (restore continue)
+
+  (goto (reg continue))
+  after-call3
+  after-lambda1
+
+; Redundant stack use
+;  (restore env)
+
+  (perform (op define-variable!) (const f) (reg val) (reg env))
+  (assign val (const ok))
+
+; Redundant stack use
+;  (restore continue)
+
+  ))
+|#
 
