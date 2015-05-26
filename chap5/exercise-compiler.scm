@@ -271,6 +271,9 @@
 ; Operands are evaluated right-to-left
 
 #|
+
+; evaluate left-to-right
+
 (define (construct-arglist operand-codes)
   (let ((operand-codes operand-codes)) ; remove (reverse *)
     (if (null? operand-codes)
@@ -330,7 +333,6 @@
 		    seq2)
 ;	(preserving (cdr regs) seq1 seq2)
 	)))
-|#
 
 (compile
  '(define (f x)
@@ -338,10 +340,7 @@
  'val
  'next)
 
-#|
-
 ; Bunch of redundant stack uses
-
 ((env) (val)
  (
 
@@ -427,3 +426,197 @@
   ))
 |#
 
+;;; Ex 5.38
+
+; a, b
+
+; Just returns seq1 and seq2 to add an appropreate `preserving` with subsequent instructions
+(define (spread-arguments a1 a2)
+  (let ((seq1 (compile a1 'arg1 'next))
+	(seq2 (compile a2 'arg2 'next)))
+    (list seq1 seq2)))
+
+(define open-code-primitives '(= * - +))
+(define (open-code? exp) (memq (car exp) open-code-primitives))
+
+(define (compile exp target linkage)
+  (cond ((self-evaluating? exp)
+	 (compile-self-evaluating exp target linkage))
+	((quoted? exp) (compile-quoted exp target linkage))
+	((variable? exp)
+	 (compile-variable exp target linkage))
+	((assignment? exp)
+	 (compile-assignment exp target linkage))
+	((definition? exp)
+	 (compile-definition exp target linkage))
+	((if? exp) (compile-if exp target linkage))
+	((lambda? exp) (compile-lambda exp target linkage))
+	((begin? exp)
+	 (compile-sequence (begin-actions exp)
+			   target
+			   linkage))
+	((cond? exp) (compile (cond->if exp) target linkage))
+	((open-code? exp) (compile-open-code exp target linkage)) ; added!!!!
+	((application? exp)
+	 (compile-application exp target linkage))
+	(else
+	 (error "Unknown expression type -- COMPILE" exp))))
+
+(define (compile-open-code exp target linkage)
+  (if (eq? (length exp) 3)
+      (let ((op (car exp))
+	    (operand-seqs (spread-arguments (cadr exp) (caddr exp))))
+	(let ((seq1 (car operand-seqs))
+	      (seq2 (cadr operand-seqs)))
+	  (end-with-linkage
+	   linkage
+	   (preserving
+	    '(env)
+	    seq1
+	    (preserving
+	     '(env arg1) ; preserve arg1 because it could be modified in `seq2`
+	     seq2
+	     (make-instruction-sequence '(arg1 arg2) (list target)
+					`((assign ,target (op ,op) (reg arg1) (reg arg2)))))))))
+      (error "Number of operands should be 3 -- COMPILE" exp)))
+
+#|
+(compile
+ '(* 2 (+ 1 3))
+ 'val
+ 'next)
+
+(() (arg1 arg2 val)
+ ((assign arg1 (const 2))
+  (save arg1) ; `arg1` is preserved
+  (assign arg1 (const 1))
+  (assign arg2 (const 3))
+  (assign arg2 (op +) (reg arg1) (reg arg2))
+  (restore arg1)  ; `arg1` is restored
+  (assign val (op *) (reg arg1) (reg arg2))))
+
+; c
+
+(compile
+ '(define (factorial n)
+    (if (= n 1) 1
+	(* (factorial (- n 1)) n)))
+ 'val
+ 'next)
+
+; 80 lines -> 43 lines
+
+; left : original 
+; right: leverage open-code
+
+((env) (val)
+ ((assign val (op make-compiled-procedure) (label entry2) (reg env))
+  (goto (label after-lambda1))
+  entry2
+  (assign env (op compiled-procedure-env) (reg proc))
+  (assign env (op extend-environment) (const (n)) (reg argl) (reg env))
+
+  ;;; diff START ;;;
+  
+  (save continue)                                               ; (assign arg1 (op lookup-variable-value) (const n) (reg env))
+  (save env)                                                    ; (assign arg2 (const 1))
+  (assign proc (op lookup-variable-value) (const =) (reg env))  ; (assign val (op =) (reg arg1) (reg arg2))
+  (assign val (const 1))
+  (assign argl (op list) (reg val))
+  (assign val (op lookup-variable-value) (const n) (reg env))
+  (assign argl (op cons) (reg val) (reg argl))
+  (test (op primitive-procedure?) (reg proc))
+  (branch (label primitive-branch17))
+  compiled-branch16
+  (assign continue (label after-call15))
+  (assign val (op compiled-procedure-entry) (reg proc))
+  (goto (reg val))
+  primitive-branch17
+  (assign val (op apply-primitive-procedure) (reg proc) (reg argl))
+  after-call15
+  (restore env)
+  (restore continue)
+
+  ;;; diff END ;;;
+  
+  (test (op false?) (reg val))
+  (branch (label false-branch4))
+  true-branch5
+  (assign val (const 1))
+  (goto (reg continue))
+  
+  false-branch4
+
+  ;;; diff START ;;;
+  
+  (assign proc (op lookup-variable-value) (const *) (reg env))         ; (save continue)
+  (save continue)                                                      ; (save env)
+  (save proc)                                                          ; (assign proc (op lookup-variable-value) (const factorial) (reg env))
+  (assign val (op lookup-variable-value) (const n) (reg env))          ; (assign arg1 (op lookup-variable-value) (const n) (reg env))
+  (assign argl (op list) (reg val))                                    ; (assign arg2 (const 1))
+  (save argl)                                                          ; (assign val (op -) (reg arg1) (reg arg2))
+  (assign proc (op lookup-variable-value) (const factorial) (reg env)) ; (assign argl (op list) (reg val))
+  (save proc)
+  (assign proc (op lookup-variable-value) (const -) (reg env))
+  (assign val (const 1))
+  (assign argl (op list) (reg val))
+  (assign val (op lookup-variable-value) (const n) (reg env))
+  (assign argl (op cons) (reg val) (reg argl))
+
+  ;;; diff END ;;;
+
+  (test (op primitive-procedure?) (reg proc))
+  (branch (label primitive-branch8))
+  
+  compiled-branch7
+
+  ;;; diff START ;;;
+  
+  (assign continue (label after-call6))                 ; (assign continue (label proc-return9))
+  (assign val (op compiled-procedure-entry) (reg proc)) ; (assign val (op compiled-procedure-entry) (reg proc))
+  (goto (reg val))                                      ; (goto (reg val))
+                                                        ; proc-return9
+                                                        ; (assign arg1 (reg val))
+                                                        ; (goto (label after-call6))
+
+  ;;; diff END ;;;
+  
+  primitive-branch8
+
+  ;;; diff START ;;;
+  
+  (assign val (op apply-primitive-procedure) (reg proc) (reg argl)) ; (assign arg1 (op apply-primitive-procedure) (reg proc) (reg argl))
+  after-call6                                                       ; after-call6
+  (assign argl (op list) (reg val))                                 ; (restore env)
+  (restore proc)                                                    ; (assign arg2 (op lookup-variable-value) (const n) (reg env))
+  (test (op primitive-procedure?) (reg proc))                       ; (assign val (op *) (reg arg1) (reg arg2))
+  (branch (label primitive-branch11))                               ; (restore continue)
+  compiled-branch10                                                 ; (goto (reg continue))
+  (assign continue (label after-call9))
+  (assign val (op compiled-procedure-entry) (reg proc))
+  (goto (reg val))
+  primitive-branch11
+  (assign val (op apply-primitive-procedure) (reg proc) (reg argl))
+  after-call9
+  (restore argl)
+  (assign argl (op cons) (reg val) (reg argl))
+  (restore proc)
+  (restore continue)
+  (test (op primitive-procedure?) (reg proc))
+  (branch (label primitive-branch14))
+  compiled-branch13
+  (assign val (op compiled-procedure-entry) (reg proc))
+  (goto (reg val))
+  primitive-branch14
+  (assign val (op apply-primitive-procedure) (reg proc) (reg argl))
+  (goto (reg continue))
+  after-call12
+  
+  ;;; diff END ;;;
+  
+  after-if3
+  after-lambda1
+  (perform (op define-variable!) (const factorial) (reg val) (reg env))
+  (assign val (const ok))))
+
+|#
