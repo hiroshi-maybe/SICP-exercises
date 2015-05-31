@@ -628,6 +628,12 @@
       (first-frame env)
       (lookup-frame-by-offset (- frame-offset 1) (enclosing-environment env))))
 
+; constructor and selectors
+(define (lexical-address addr-frame addr-offset)
+  (cons addr-frame addr-offset))
+(define (addr-frame address) (car address))
+(define (addr-offset address) (cdr address))
+
 (define (lexical-address-lookup env lexical-addr)
   (define (scan-var var-offset vars vals)
     (if (= var-offset 0)
@@ -636,8 +642,8 @@
 	      (error "unassigned var" (car var))
 	      value))
 	(scan-var (- var-offset 1) (cdr vars) (cdr vals))))
-  (let ((frame (lookup-frame-by-offset (car lexical-addr) env)))
-    (scan-var (cdr lexical-addr)
+  (let ((frame (lookup-frame-by-offset (addr-frame lexical-addr) env)))
+    (scan-var (addr-offset lexical-addr)
 	      (frame-variables frame)
 	      (frame-values frame))))
 
@@ -646,9 +652,7 @@
     (if (= var-offset 0)
 	(set-car! vals val)
 	(set-val! (- var-offset 1) (cdr vars) (cdr vals))))
-  (let ((frame (lookup-frame-by-offset (car lexical-addr) env)))
-    (set-val! (cdr lexical-addr)
+  (let ((frame (lookup-frame-by-offset (addr-frame lexical-addr) env)))
+    (set-val! (addr-offset lexical-addr)
 	      (frame-variables frame)
 	      (frame-values frame))))
-
-	      
