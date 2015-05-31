@@ -667,8 +667,8 @@
 
 (define (compile exp target linkage compile-time-env)                        ; compile-time-env
   (cond ((self-evaluating? exp)
-         (compile-self-evaluating exp target linkage compile-time-env))      ; compile-time-env
-        ((quoted? exp) (compile-quoted exp target linkage compile-time-env)) ; compile-time-env
+         (compile-self-evaluating exp target linkage))
+        ((quoted? exp) (compile-quoted exp target linkage))
         ((variable? exp)
          (compile-variable exp target linkage compile-time-env))             ; compile-time-env
         ((assignment? exp)
@@ -687,6 +687,37 @@
          (compile-application exp target linkage compile-time-env))            ; compile-time-env
 	(else
 	 (error "Unknown expression type -- COMPILE" exp))))
+
+(define (compile-definition exp target linkage compile-time-env)        ; compile-time-env
+  (let ((var (definition-variable exp))
+	(get-value-code
+	 (compile (definition-value exp) 'val 'next compile-time-env))) ; compile-time-env
+    (end-with-linkage linkage
+		      (preserving '(env)
+				  get-value-code
+				  (make-instruction-sequence '(env val) (list target)
+							     `((perform (op define-variable!)
+									(const ,var)
+									(reg val)
+									(reg env))
+							                (assign ,target (const ok))))))))
+(define (compile-application exp target linkage compile-time-env)              ; compile-time-env
+  (let ((proc-code (compile (operator exp) 'proc 'next compile-time-env))
+	(operand-codes
+	 (map (lambda (operand) (compile operand 'val 'next compile-time-env)) ; compile-time-env
+	      (operands exp))))
+    (preserving '(env continue)
+		proc-code
+		(preserving '(proc continue)
+			    (construct-arglist operand-codes)
+			    (compile-procedure-call target linkage)))))
+(define (compile-sequence seq target linkage compile-time-env)  ; compile-time-env
+  (if (last-exp? seq)
+      (compile (first-exp seq) target linkage compile-time-env) ; compile-time-env
+      (preserving
+       '(env continue)
+       (compile (first-exp seq) target 'next compile-time-env)  ; compile-time-env
+       (compile-sequence (rest-exps seq) target linkage compile-time-env)))) ; compile-time-env
 
 (define (compile-lambda exp target linkage compile-time-env) ; compile-time-env
   (let ((proc-entry (make-label 'entry))
@@ -716,7 +747,7 @@
 					  (reg argl)
 					  (reg env))))
      (compile-sequence (lambda-body exp) 'val 'return
-		       (extend-compile-time compile-time-env formals))))) ; extend env
+		       (extend-compile-time-env compile-time-env formals))))) ; extend env
 
 ; helper
 (define (extend-compile-time-env env frame)
@@ -738,3 +769,92 @@
 	  (else (find-var-offset var (+ offset 1) (cdr frame-vars)))))
   (scan-frame var 0 frames))
 
+;;; Ex 5.42
+
+(define (compile-variable exp target linkage compile-time-env)
+  (let ((lexical-addr (find-variable exp compile-time-env)))
+    (if (eq? lexical-addr 'not-found)
+	(end-with-linkage
+	 linkage
+	 (make-instruction-sequence
+	  '(env) (list target)
+	  `((assign ,target
+		    (op lookup-variable-value)
+		    (const ,exp)
+		    (reg env)))))
+	(end-with-linkage
+	 linkage
+	 (make-instruction-sequence
+	  '(env) (list target)
+	  `((assign ,target
+		    (op lexical-address-lookup)
+		    (reg env)
+		    (const ,lexical-addr))))))))
+
+(define (compile-assignment exp target linkage compile-time-env)
+  (let ((var (assignment-variable exp))
+	(get-value-code
+	 (compile (assignment-value exp) 'val 'next compile-time-env))
+	(lexical-addr (find-variable exp compile-time-env)))
+    (end-with-linkage
+     linkage
+     (preserving
+      '(env)
+      get-value-code
+      (make-instruction-sequence
+       '(env val) (list target)
+       (if (eq? lexical-addr 'not-found)	   
+	   `((perform (op set-variable-value!)
+		      (const ,var)
+		      (reg val)
+		      (reg env))
+	     (assign ,target (const ok)))
+	   `((perform (op lexical-address-set!)
+		      (reg env)
+		      (const ,lexical-addr)
+		      (reg val))
+	     (assign ,target (const ok)))))))))
+
+#|
+(compile
+ '((lambda (x y)
+     (+ x y))
+   1 2)
+ 'val
+ 'next
+ '())
+
+((env) (env proc argl continue val)
+ ((assign proc (op make-compiled-procedure) (label entry2) (reg env))
+  (goto (label after-lambda1))
+  entry2
+  (assign env (op compiled-procedure-env) (reg proc))
+  (assign env (op extend-environment) (const (x y)) (reg argl) (reg env))
+  (assign proc (op lookup-variable-value) (const +) (reg env))
+  (assign val (op lexical-address-lookup) (reg env) (const (0 . 1)))
+  (assign argl (op list) (reg val))
+  (assign val (op lexical-address-lookup) (reg env) (const (0 . 0)))
+  (assign argl (op cons) (reg val) (reg argl))
+  (test (op primitive-procedure?) (reg proc))
+  (branch (label primitive-branch5))
+  compiled-branch4
+  (assign val (op compiled-procedure-entry) (reg proc))
+  (goto (reg val))
+  primitive-branch5
+  (assign val (op apply-primitive-procedure) (reg proc) (reg argl))
+  (goto (reg continue))
+  after-call3
+  after-lambda1
+  (assign val (const 2))
+  (assign argl (op list) (reg val))
+  (assign val (const 1))
+  (assign argl (op cons) (reg val) (reg argl))
+  (test (op primitive-procedure?) (reg proc))
+  (branch (label primitive-branch8))
+  compiled-branch7
+  (assign continue (label after-call6))
+  (assign val (op compiled-procedure-entry) (reg proc))
+  (goto (reg val))
+  primitive-branch8
+  (assign val (op apply-primitive-procedure) (reg proc) (reg argl)) after-call6))
+|#
