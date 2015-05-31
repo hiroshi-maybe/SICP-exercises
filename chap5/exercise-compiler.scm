@@ -620,3 +620,35 @@
   (assign val (const ok))))
 
 |#
+
+;;; Ex 5.39
+
+(define (lookup-frame-by-offset frame-offset env)
+  (if (= frame-offset 0)
+      (first-frame env)
+      (lookup-frame-by-offset (- frame-offset 1) (enclosing-environment env))))
+
+(define (lexical-address-lookup env lexical-addr)
+  (define (scan-var var-offset vars vals)
+    (if (= var-offset 0)
+	(let ((value (car vals)))
+	  (if (eq? value '*unassigned*)
+	      (error "unassigned var" (car var))
+	      value))
+	(scan-var (- var-offset 1) (cdr vars) (cdr vals))))
+  (let ((frame (lookup-frame-by-offset (car lexical-addr) env)))
+    (scan-var (cdr lexical-addr)
+	      (frame-variables frame)
+	      (frame-values frame))))
+
+(define (lexical-address-set! env lexical-addr val)
+  (define (set-val! var-offset vars vals)
+    (if (= var-offset 0)
+	(set-car! vals val)
+	(set-val! (- var-offset 1) (cdr vars) (cdr vals))))
+  (let ((frame (lookup-frame-by-offset (car lexical-addr) env)))
+    (set-val! (cdr lexical-addr)
+	      (frame-variables frame)
+	      (frame-values frame))))
+
+	      
