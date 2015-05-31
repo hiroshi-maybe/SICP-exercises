@@ -858,3 +858,21 @@
   primitive-branch8
   (assign val (op apply-primitive-procedure) (reg proc) (reg argl)) after-call6))
 |#
+
+;;; Ex 5.43
+
+(define (compile-lambda-body exp proc-entry compile-time-env)
+  (let ((formals (lambda-parameters exp)))
+    (append-instruction-sequences
+     (make-instruction-sequence
+      '(env proc argl) '(env)
+      `(,proc-entry
+	(assign env (op compiled-procedure-env) (reg proc))
+	(assign env
+		(op extend-environment)
+		(const ,formals)
+		(reg argl)
+		(reg env))))
+     (compile-sequence
+      (scan-out-defines (lambda-body exp)) 'val 'return       ; scan-out-defines
+      (extend-compile-time-env compile-time-env formals)))))

@@ -185,3 +185,25 @@
 (define (compiled-procedure-entry c-proc) (cadr c-proc))
 (define (compiled-procedure-env c-proc) (caddr c-proc))
 
+;;; from Ex 4.16 https://github.com/k-ori/SICP-exercises/blob/master/chap4/exercise-mceval.scm
+(define (make-let bindings body)
+  (list 'let bindings body))
+(define (make-let-binding var val)
+  (cons var val))
+(define (make-assignment var val)
+  (list 'set! var val))
+(define (invert fun)
+  (lambda (x)
+    (not (fun x))))
+
+(define (scan-out-defines body)
+  (let* ((defines (filter definition? body))
+   (let-body (filter (invert definition?) body))
+   (define-vars (map definition-variable defines))
+   (define-vals (map definition-value defines)))
+    (if (null? define-vars)
+  body
+  (make-let (map (lambda (variable) 
+       (make-let-binding variable '*unassigned*)) define-vars)
+      (sequence->exp (append (map make-assignment define-vars define-vals)
+          let-body))))))
