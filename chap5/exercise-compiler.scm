@@ -623,6 +623,12 @@
 
 ;;; Ex 5.39
 
+; from ch5-eceval-support.scm
+(define (enclosing-environment env) (cdr env))
+(define (first-frame env) (car env))
+(define (frame-variables frame) (car frame))
+(define (frame-values frame) (cdr frame))
+
 (define (lookup-frame-by-offset frame-offset env)
   (if (= frame-offset 0)
       (first-frame env)
@@ -710,9 +716,25 @@
 					  (reg argl)
 					  (reg env))))
      (compile-sequence (lambda-body exp) 'val 'return
-		       (extend-compile-time compile-time-env formals)))) ; extend env
+		       (extend-compile-time compile-time-env formals))))) ; extend env
 
 ; helper
 (define (extend-compile-time-env env frame)
   (cons frame env))
+
+;;; Ex 5.41
+
+(define (find-variable var frames)
+  (define (scan-frame var frame-offset frames)
+    (if (null? frames)
+	'not-found
+	(let ((var-offset (find-var-offset var 0 (car frames))))
+	  (if (eq? var-offset 'not-found)
+	      (scan-frame var (+ frame-offset 1) (cdr frames))
+	      (lexical-address frame-offset var-offset)))))
+  (define (find-var-offset var offset frame-vars)
+    (cond ((null? frame-vars) 'not-found)
+	  ((eq? var (car frame-vars)) offset)
+	  (else (find-var-offset var (+ offset 1) (cdr frame-vars)))))
+  (scan-frame var 0 frames))
 
