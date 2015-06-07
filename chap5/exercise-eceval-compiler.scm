@@ -133,3 +133,49 @@ tail rec : 6 * <n> + 7   | 3 (constant)
 	((and (not (eq? target 'val)) (eq? linkage 'return))
 	 (error "return linkage, target not val -- COMPILE"
 		target))))
+
+
+#|
+
+; test
+
+1 ]=> (compile-and-go
+'(define (f x)
+   (+ 1 (g x))))
+
+(total-pushes = 0 maximum-depth = 0)
+;;; EC-Eval value:
+ok
+
+;;; EC-Eval input:
+(define (g x)
+  (* x x))
+
+(total-pushes = 3 maximum-depth = 3)
+;;; EC-Eval value:
+ok
+
+;;; EC-Eval input:
+(f 3)
+
+(total-pushes = 16 maximum-depth = 7)
+;;; EC-Eval value:
+10
+
+;;; EC-Eval input:
+(define (g x)
+  (+ x x))
+
+(total-pushes = 3 maximum-depth = 3)
+;;; EC-Eval value:
+ok
+
+;;; EC-Eval input:
+(f 3)
+
+(total-pushes = 16 maximum-depth = 7)
+;;; EC-Eval value:
+7
+
+|#
+
