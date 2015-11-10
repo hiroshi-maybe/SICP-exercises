@@ -118,7 +118,7 @@
   (map car (let-bindings exp)))
 (define (let-bound-values exp)
   (map cadr (let-bindings exp)))
-(define (let-body exp) (caddr exp))
+(define (let-body exp) (cddr exp))
 
 (define (let->combination exp)
   (cons (make-lambda (let-bound-names exp)
